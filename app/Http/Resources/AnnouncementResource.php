@@ -15,7 +15,7 @@ class AnnouncementResource extends JsonResource
     public function toArray(Request $request): array
     {
         $firstImage = $this->images->first();
-        $imageUrl = $firstImage ? URL::to('/') . Storage::url('announcements/' . $firstImage->image_path) : null;
+        $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
 
         return [
             'id' => $this->id,
