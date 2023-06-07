@@ -46,9 +46,13 @@ Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
 
 Route::middleware('auth:sanctum')->get('/verify_token', function (Request $request) {
 
-    return response(null, 200);
+    $user = $request->user();
+
+    return response()->json(['user' => $user], 200);
+
 
 });
+
 
 
 
