@@ -14,14 +14,20 @@ return new class extends Migration
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('category_id');
             $table->string('title');
             $table->text('description');
             $table->decimal('price', 8, 2);
+            $table->string('location');
+            $table->string('postal_code');
+            $table->string('phone_number');
             $table->dateTime('created_at');
             $table->dateTime('updated_at')->nullable()->default(null);
-
+        
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('category_id')->references('id')->on('categories');
         });
+        
     }
 
 
