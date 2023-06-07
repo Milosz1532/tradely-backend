@@ -50,6 +50,8 @@ class AuthController extends Controller
     //     return response(compact('user', 'token'));
 
     // }
+
+
     public function login(LoginRequest $request) {
         $credentials = $request->validated();
         if (!Auth::attempt($credentials)) {
@@ -59,10 +61,8 @@ class AuthController extends Controller
         }
         $user = Auth::user();
         $token = $user->createToken('main')->plainTextToken;
-        // Ustawianie tokenu jako ciasteczko
         $cookie = cookie('ACCESS_TOKEN', $token, 60); 
-
-        return response(compact('user'))->cookie($cookie);
+        return response(compact('user', 'token'))->cookie($cookie);
     }
 
 
