@@ -11,7 +11,7 @@ use App\Models\User;
 
 class Announcement extends Model
 {
-    protected $fillable = ['title', 'description', 'price', 'user_id'];
+    protected $fillable = ['title', 'description', 'price', 'user_id', 'category_id', 'location', 'postal_code', 'phone_number'];
 
     public function user()
     {

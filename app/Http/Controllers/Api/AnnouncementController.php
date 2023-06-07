@@ -40,6 +40,10 @@ class AnnouncementController extends Controller
             'description' => 'required',
             'price' => 'required',
             'user_id' => 'required',
+            'category_id' => 'required',
+            'location' => 'required',
+            'postal_code' => 'required',
+            'phone_number' => 'required',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp'
         ]);
 
