@@ -20,9 +20,10 @@ use App\Http\Requests\SignupRequest;
 class AuthController extends Controller
 {
     public function signup(SignupRequest $request) {
+
         $data = $request->validated();
         $user = User::create([
-            'name' => $data['name'],
+            'login' => $data['login'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
@@ -37,6 +38,18 @@ class AuthController extends Controller
     }
 
 
+    // public function login(LoginRequest $request) {
+    //     $credentials = $request->validated();
+    //     if (!Auth::attempt($credentials)) {
+    //         return response([
+    //             'message' => 'Provided email address or password is incorrect',
+    //         ], 422);
+    //     }
+    //     $user = Auth::user();
+    //     $token = $user->createToken('main')->plainTextToken;
+    //     return response(compact('user', 'token'));
+
+    // }
     public function login(LoginRequest $request) {
         $credentials = $request->validated();
         if (!Auth::attempt($credentials)) {
@@ -46,8 +59,10 @@ class AuthController extends Controller
         }
         $user = Auth::user();
         $token = $user->createToken('main')->plainTextToken;
-        return response(compact('user', 'token'));
+        // Ustawianie tokenu jako ciasteczko
+        $cookie = cookie('ACCESS_TOKEN', $token, 60); 
 
+        return response(compact('user'))->cookie($cookie);
     }
 
 
