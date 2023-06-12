@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->get('/verify_token', function (Request $reque
 
     $user = $request->user();
 
-    return response()->json(['user' => $user], 200);
+    return response()->json($user, 200);
 
 
 });

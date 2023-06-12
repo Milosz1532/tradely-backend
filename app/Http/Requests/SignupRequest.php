@@ -37,16 +37,17 @@ class SignupRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
-        $language = $this->header('Accept-Language', 'en');
-        app()->setLocale($language);
-
         return [
-            'required' => __('validation.required'),
-            'email' => __('validation.email'),
-            'max.string' => __('validation.max.string'),
-            'unique' => __('validation.unique'),
+            'login.required' => trans('validation.login_required'),
+            'login.string' => trans('validation.login_string'),
+            'login.max' => trans('validation.login_max'),
+            'email.required' => trans('validation.email_required'),
+            'email.email' => trans('validation.email_email'),
+            'email.unique' => trans('validation.email_unique'),
+            'password.required' => trans('validation.password_required'),
+            'password.string' => trans('validation.password_string'),
         ];
     }
 }

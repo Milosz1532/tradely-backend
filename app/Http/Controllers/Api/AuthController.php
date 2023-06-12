@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Lang;
 
 
 use App\Http\Controllers\Controller;
@@ -34,6 +35,13 @@ class AuthController extends Controller
         return response(compact('user', 'token'));
     }
 
+    // public function signup(Request $request) 
+    // {
+    //     $data = [
+    //         'message' => trans('validation.login_required')
+    //       ];
+    //       return response()->json($data, 404);
+    // }
 
 
 
@@ -42,7 +50,7 @@ class AuthController extends Controller
         $credentials = $request->validated();
         if (!Auth::attempt($credentials)) {
             return response([
-                'message' => 'Provided email address or password is incorrect',
+                'message' => trans('validation.invalid_credentials'),
             ], 422);
         }
         $user = Auth::user();

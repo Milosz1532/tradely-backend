@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
@@ -25,6 +26,17 @@ class LoginRequest extends FormRequest
             // 'email' => 'required|email|exists:users,email',
             'email' => 'required|email',
             'password' => 'required',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.required' => trans('validation.email_required'),
+            'email.email' => trans('validation.email_email'),
+            'email.unique' => trans('validation.email_unique'),
+            'password.required' => trans('validation.password_required'),
+            'password.string' => trans('validation.password_string'),
         ];
     }
 }

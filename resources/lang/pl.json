@@ -1,8 +1,0 @@
-{
-    "required": "Pole :attribute jest wymagane.",
-    "email": "Pole :attribute musi być poprawnym adresem email.",
-    "max": {
-        "string": "Pole :attribute nie może być dłuższe niż :max znaków."
-    },
-    "unique": "Pole :attribute jest już zajęte."
-}
