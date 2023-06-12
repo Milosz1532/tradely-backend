@@ -3,8 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Lang;
 
 class SignupRequest extends FormRequest
 {
@@ -29,8 +28,25 @@ class SignupRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-
             ]
+        ];
+    }
+
+    /**
+     * Get the validation error messages.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        $language = $this->header('Accept-Language', 'en');
+        app()->setLocale($language);
+
+        return [
+            'required' => __('validation.required'),
+            'email' => __('validation.email'),
+            'max.string' => __('validation.max.string'),
+            'unique' => __('validation.unique'),
         ];
     }
 }
