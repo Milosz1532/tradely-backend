@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Http\Resources\AnnouncementResource;
-use App\Models\Announcement;
 
 use Carbon\Carbon;
 
@@ -15,7 +14,8 @@ use Illuminate\Support\Facades\URL;
 use Intervention\Image\Facades\Image;
 use Ramsey\Uuid\Uuid;
 
-
+use App\Models\Announcement;
+use App\Models\Category;
 
 class AnnouncementController extends Controller
 {
@@ -100,6 +100,66 @@ class AnnouncementController extends Controller
 
         return response()->json($response);
     }
+
+    // public function search(Request $request)
+    // {
+    //     $location = $request->input('location');
+    //     $category = $request->input('category');
+    //     $keyword = $request->input('keyword');
+
+    //     $query = Announcement::query();
+
+    //     if ($location !== 'default') {
+    //         $query->where('location', $location);
+    //     }
+
+    //     if ($category !== 'default') {
+    //         $query->where('category_id', $category);
+    //     }
+
+    //     if (!empty($keyword)) {
+    //         $query->where(function ($query) use ($keyword) {
+    //             $query->where('title', 'like', "%$keyword%")
+    //                 ->orWhere('description', 'like', "%$keyword%");
+    //         });
+    //     }
+
+    //     $announcements = $query->orderBy('id', 'desc')->paginate(20);
+
+    //     return AnnouncementResource::collection($announcements);
+    // }
+    public function search(Request $request)
+{
+    $location = $request->input('location') ?? "default";
+    $categoryName = $request->input('category') ?? "default";
+    $keyword = $request->input('keyword');
+
+    $query = Announcement::query();
+
+    if ($location !== 'default') {
+        $query->where('location', $location);
+    }
+
+    if ($categoryName !== 'default') {
+        $category = Category::where('name', $categoryName)->first();
+
+        $query->where('category_id', $category->id);
+    }
+
+    if (!empty($keyword)) {
+        $query->where(function ($query) use ($keyword) {
+            $query->where('title', 'like', "%$keyword%")
+                ->orWhere('description', 'like', "%$keyword%");
+        });
+    }
+
+    $announcements = $query->orderBy('id', 'desc')->paginate(20);
+
+    return AnnouncementResource::collection($announcements);
+}
+
+
+
 
 
     /**

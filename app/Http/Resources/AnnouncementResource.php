@@ -20,6 +20,8 @@ class AnnouncementResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'category_id' => $this->category_id,
+            'category' => $this->category->name,
             'description' => $this->description,
             'price' => $this->price,
             'user_id' => $this->user_id,
