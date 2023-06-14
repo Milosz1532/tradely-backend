@@ -10,5 +10,4 @@ return [
     'password_required' => 'Pole hasło jest wymagane.',
     'password_string' => 'Pole hasło musi być ciągiem znaków.',
     'invalid_credentials' => 'Podany adres email lub hasło jest nieprawidłowe.',
-
 ];

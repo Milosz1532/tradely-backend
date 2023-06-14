@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AnnouncementController;
+use App\Http\Controllers\Api\CategoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
@@ -20,6 +21,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::get('/users',[UserController::class, 'index']);
 });
 
+Route::middleware('auth:sanctum')->get('/verify_token', function (Request $request) {
+
+    $user = $request->user();
+
+    return response()->json($user, 200);
+
+
+});
+
 
 
 Route::post('/signup', [AuthController::class, 'signup']);
@@ -31,13 +41,8 @@ Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::post('/announcements', [AnnouncementController::class, 'store']);
 
-Route::middleware('auth:sanctum')->get('/verify_token', function (Request $request) {
 
-    $user = $request->user();
+Route::get('/categories', [CategoryController::class, 'index']);
 
-    return response()->json($user, 200);
-
-
-});
 
 

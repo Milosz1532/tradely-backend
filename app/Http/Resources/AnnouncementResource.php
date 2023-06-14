@@ -23,10 +23,13 @@ class AnnouncementResource extends JsonResource
             'category_id' => $this->category_id,
             'category' => $this->category->name,
             'description' => $this->description,
+            'location' => $this->location,
             'price' => $this->price,
             'user_id' => $this->user_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => optional($this->created_at)->format('d.m.Y H:i:s'),
+
+            'updated_at' => optional($this->updated_at)->format('d.m.Y H:i:s'),
+
             'first_image' => $imageUrl,
         ];
     }

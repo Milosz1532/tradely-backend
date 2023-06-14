@@ -19,20 +19,44 @@ use App\Models\Category;
 
 class AnnouncementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+
+    public function index(Request $request)
     {
-        return AnnouncementResource::collection( 
-            Announcement::query()->orderBy('id','desc')->paginate(20)
-        ); 
-    
+        $location = $request->input('location');
+        $latestAnnouncements = Announcement::query()
+            ->where('status_id', '=', 2)
+            ->orderBy('id', 'desc')
+            ->take(20)
+            ->get();
+        
+        $locationAnnouncements = [];
+        if ($location) {
+            $locationAnnouncements = Announcement::query()
+                ->where('location', '=', $location)
+                ->where('status_id', '=', 2)
+                ->orderBy('id', 'desc')
+                ->take(20)
+                ->get();
+        }
+        
+        $categoryAnnouncements = Announcement::query()
+            ->where('category_id', '=', 1)
+            ->where('status_id', '=', 2)
+            ->orderBy('id', 'desc')
+            ->take(20)
+            ->get();
+        
+        return [
+            'latest_announcements' => AnnouncementResource::collection($latestAnnouncements),
+            'location_announcements' => AnnouncementResource::collection($locationAnnouncements),
+            'category_announcements' => AnnouncementResource::collection($categoryAnnouncements),
+        ];
+        
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -77,22 +101,28 @@ class AnnouncementController extends Controller
         return response()->json($announcement, 201);
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $announcement = Announcement::with('images')->findOrFail($id);
+        $user = $announcement->User;
+
+        $totalAnnouncements = $user->announcements()->count();
 
         $response = [
             'id' => $announcement->id,
             'title' => $announcement->title,
             'description' => $announcement->description,
             'price' => $announcement->price,
-            'user_id' => $announcement->user_id,
-            'created_at' => $announcement->created_at,
-            'updated_at' => $announcement->updated_at,
+            'status' => $announcement->status,
+            'user' => [
+                'id' => $user->id,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'created_at' => $user->created_at ? $user->created_at->format('d.m.Y H:i:s') : trans('messages.no_data'),
+                'total_announcements' => $totalAnnouncements,
+            ],
+            'created_at' => optional($announcement->created_at)->format('d.m.Y H:i:s'),
+            'updated_at' => optional($announcement->updated_at)->format('d.m.Y H:i:s'),
             'images' => $announcement->images->map(function ($image) {
                 return URL::to('/') . Storage::url($image->image_path);
             })->toArray(),
@@ -101,46 +131,21 @@ class AnnouncementController extends Controller
         return response()->json($response);
     }
 
-    // public function search(Request $request)
-    // {
-    //     $location = $request->input('location');
-    //     $category = $request->input('category');
-    //     $keyword = $request->input('keyword');
 
-    //     $query = Announcement::query();
 
-    //     if ($location !== 'default') {
-    //         $query->where('location', $location);
-    //     }
-
-    //     if ($category !== 'default') {
-    //         $query->where('category_id', $category);
-    //     }
-
-    //     if (!empty($keyword)) {
-    //         $query->where(function ($query) use ($keyword) {
-    //             $query->where('title', 'like', "%$keyword%")
-    //                 ->orWhere('description', 'like', "%$keyword%");
-    //         });
-    //     }
-
-    //     $announcements = $query->orderBy('id', 'desc')->paginate(20);
-
-    //     return AnnouncementResource::collection($announcements);
-    // }
     public function search(Request $request)
 {
-    $location = $request->input('location') ?? "default";
-    $categoryName = $request->input('category') ?? "default";
+    $location = $request->input('location') ?? "all_locations";
+    $categoryName = $request->input('category') ?? "all_categories";
     $keyword = $request->input('keyword');
 
     $query = Announcement::query();
 
-    if ($location !== 'default') {
+    if ($location !== 'all_locations') {
         $query->where('location', $location);
     }
 
-    if ($categoryName !== 'default') {
+    if ($categoryName !== 'all_categories') {
         $category = Category::where('name', $categoryName)->first();
 
         $query->where('category_id', $category->id);

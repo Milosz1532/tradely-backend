@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AnnouncementImage;
+use App\Models\AnnouncementsStatuses;
 use App\Models\User;
 
 
@@ -23,6 +24,10 @@ class Announcement extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function status()
+    {
+        return $this->belongsTo(AnnouncementsStatuses::class);
+    }
 
     public function images()
     {

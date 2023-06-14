@@ -75,6 +75,10 @@ return [
     'datetime' => [
         'format' => 'Y-m-d H:i:s',
     ],
+
+    'date_format' => 'd/m/Y',
+    'date_format_javascript' => 'DD/MM/YYYY',
+
     
 
     /*
@@ -173,6 +177,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
     ])->toArray(),
 
     /*
