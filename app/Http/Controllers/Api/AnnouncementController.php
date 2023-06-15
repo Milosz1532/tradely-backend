@@ -114,6 +114,10 @@ class AnnouncementController extends Controller
             'description' => $announcement->description,
             'price' => $announcement->price,
             'status' => $announcement->status,
+            'location' => [
+                'location_name' => $announcement->location,
+                'postal_code' =>$announcement->postal_code,
+            ],
             'user' => [
                 'id' => $user->id,
                 'first_name' => $user->first_name,
