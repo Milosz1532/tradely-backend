@@ -162,7 +162,7 @@ class AnnouncementController extends Controller
         });
     }
 
-    $announcements = $query->orderBy('id', 'desc')->paginate(20);
+    $announcements = $query->orderBy('id', 'desc')->paginate(5);
 
     return AnnouncementResource::collection($announcements);
 }
