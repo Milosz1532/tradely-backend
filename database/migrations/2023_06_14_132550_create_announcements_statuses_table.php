@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('announcements_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->timestamps();
+
         });
 
         AnnouncementsStatuses::create(['name' => 'Oczekuje na aktywację']);
