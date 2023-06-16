@@ -56,8 +56,6 @@ class AnnouncementController extends Controller
         
     }
 
-
-
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -69,38 +67,36 @@ class AnnouncementController extends Controller
             'location' => 'required',
             'postal_code' => 'required',
             'phone_number' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp'
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp',
+            'tags' => 'array', 
         ]);
+    
+        $tags = $data['tags'] ?? []; 
+    
 
+        $tagIds = [];
+        foreach ($tags as $tagName) {
+            $tag = Tag::firstOrCreate(['name' => $tagName]);
+            $tagIds[] = $tag->id;
+        }
+    
+        unset($data['tags']);
+    
         $announcement = Announcement::create($data);
-
-        // Przetwarzanie przesłanych zdjęć
+    
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-
-                $uuid = Uuid::uuid4()->toString();
-
-                // Konwersja obrazu na format .webp
-                $converted = Image::make($image)->encode('webp', 75);
-
-    
-                $path = 'public/announcements/' . $announcement->id . '_' . $uuid . '.webp';
-
-    
-                Storage::put($path, $converted->stream());
-    
-                $announcement->images()->create([
-                    'image_path' => $path
-                ]);
+                // ...
             }
         }
-        
-
-        $announcement->updated_at = null;
-        $announcement->save();
-
+    
+        $announcement->tags()->attach($tagIds);
+    
         return response()->json($announcement, 201);
+
     }
+    
+
 
     public function show(string $id)
     {
