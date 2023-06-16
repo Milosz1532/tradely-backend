@@ -16,6 +16,7 @@ use Ramsey\Uuid\Uuid;
 
 use App\Models\Announcement;
 use App\Models\Category;
+use App\Models\Tag;
 
 class AnnouncementController extends Controller
 {
@@ -114,6 +115,9 @@ class AnnouncementController extends Controller
             'description' => $announcement->description,
             'price' => $announcement->price,
             'status' => $announcement->status,
+            'tags' => $announcement->tags->map(function ($tag) {
+                return ['id' => $tag->id, 'name' => $tag->name];
+            })->values(),
             'location' => [
                 'location_name' => $announcement->location,
                 'postal_code' =>$announcement->postal_code,
