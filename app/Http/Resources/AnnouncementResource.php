@@ -34,6 +34,7 @@ class AnnouncementResource extends JsonResource
             'updated_at' => optional($this->updated_at)->format('d.m.Y H:i:s'),
 
             'first_image' => $imageUrl,
+            'favorite_count' => $this->favoritedByUsers->count(),
         ];
     }
 }

@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/profile/announcements', [AnnouncementController::class, 'userAnnouncements']);
+    Route::get('/profile/favoriteAnnouncements', [AnnouncementController::class, 'userFavoriteAnnouncements']);
 
 });
 

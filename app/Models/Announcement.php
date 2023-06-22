@@ -39,6 +39,12 @@ class Announcement extends Model
         return $this->belongsToMany(Tag::class, 'announcement_tags');
     }
 
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_announcements', 'announcement_id', 'user_id')
+            ->withTimestamps();
+    }
+
 
 
 }

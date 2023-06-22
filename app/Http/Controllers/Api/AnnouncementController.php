@@ -56,6 +56,11 @@ class AnnouncementController extends Controller
         
     }
 
+    public function userFavoriteAnnouncements(Request $request) 
+    {
+        return $request->user()->favoriteAnnouncements;
+    }
+
     public function userAnnouncements(Request $request) 
     {
         $userId = $request->user()->id;
@@ -163,6 +168,8 @@ class AnnouncementController extends Controller
             'images' => $announcement->images->map(function ($image) {
                 return URL::to('/') . Storage::url($image->image_path);
             })->toArray(),
+            'favorite_count' => $announcement->favoritedByUsers->count(),
+            
         ];
 
         return response()->json($response);
@@ -200,6 +207,26 @@ class AnnouncementController extends Controller
     return AnnouncementResource::collection($announcements);
 }
 
+
+    public function likeAnnouncement($id)
+    {
+        $user = Auth::user();
+        $announcement = Announcement::find($id);
+
+        if (!$announcement) {
+            return response()->json(['message' => 'Ogłoszenie nie istnieje.'], 404);
+        }
+
+        // Sprawdź, czy użytkownik już polubił to ogłoszenie
+        if ($announcement->favoritedByUsers()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'Ogłoszenie zostało już polubione przez tego użytkownika.'], 400);
+        }
+
+        // Dodaj polubienie ogłoszenia przez użytkownika
+        $announcement->favoritedByUsers()->attach($user->id);
+
+        return response()->json(['success' => true]);
+    }
 
 
 

@@ -28,6 +28,12 @@ class User extends Authenticatable
         return $this->hasMany(Announcement::class);
     }
 
+    public function favoriteAnnouncements()
+    {
+        return $this->belongsToMany(Announcement::class, 'favorite_announcements', 'user_id', 'announcement_id')
+            ->withTimestamps();
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
