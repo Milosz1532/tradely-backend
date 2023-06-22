@@ -56,6 +56,39 @@ class AnnouncementController extends Controller
         
     }
 
+    public function userAnnouncements(Request $request) 
+    {
+        $userId = $request->user()->id;
+        $active_announcements = Announcement::query()
+        ->where('user_id', $userId)
+        ->where('status_id', 2)
+        ->orderBy('id', 'desc')
+        ->take(20)
+        ->get();
+
+        $pending_announcements = Announcement::query()
+        ->where('user_id', $userId)
+        ->where('status_id', 1)
+        ->orderBy('id', 'desc')
+        ->take(20)
+        ->get();
+
+        $completed_announcements = Announcement::query()
+        ->where('user_id', $userId)
+        ->where('status_id', 4)
+        ->orderBy('id', 'desc')
+        ->take(20)
+        ->get();
+    
+    
+
+        return [
+            'active_announcements' => AnnouncementResource::collection($active_announcements),
+            'pending_announcements' => AnnouncementResource::collection($pending_announcements),
+            'completed_announcements' => AnnouncementResource::collection($completed_announcements),
+        ];
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
