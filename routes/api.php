@@ -17,12 +17,11 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']); 
-    // Route::apiResource('/users', UserController::class);
-    // Route::get('/users',[UserController::class, 'index']);
 
 
     Route::get('/profile/announcements', [AnnouncementController::class, 'userAnnouncements']);
     Route::get('/profile/favoriteAnnouncements', [AnnouncementController::class, 'userFavoriteAnnouncements']);
+    Route::post('/announcement/like', [AnnouncementController::class, 'likeAnnouncement']);
 
 });
 
@@ -44,6 +43,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/announcements/search', [AnnouncementController::class, 'search'])->name('search_announcement');
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
 Route::get('/announcements', [AnnouncementController::class, 'index']);
+// Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/announcements', [AnnouncementController::class, 'store']);
 
 

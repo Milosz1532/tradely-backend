@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Intervention\Image\Facades\Image;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Announcement;
 use App\Models\Category;
@@ -24,6 +25,7 @@ class AnnouncementController extends Controller
 
     public function index(Request $request)
     {
+
         $location = $request->input('location');
         $latestAnnouncements = Announcement::query()
             ->where('status_id', '=', 2)
@@ -58,7 +60,7 @@ class AnnouncementController extends Controller
 
     public function userFavoriteAnnouncements(Request $request) 
     {
-        return $request->user()->favoriteAnnouncements;
+        return AnnouncementResource::collection($request->user()->favoriteAnnouncements);
     }
 
     public function userAnnouncements(Request $request) 
@@ -208,25 +210,26 @@ class AnnouncementController extends Controller
 }
 
 
-    public function likeAnnouncement($id)
+    public function likeAnnouncement(Request $request)
     {
-        $user = Auth::user();
+        $id = $request->input('id');
+        $user = $request->user();
         $announcement = Announcement::find($id);
 
         if (!$announcement) {
             return response()->json(['message' => 'Ogłoszenie nie istnieje.'], 404);
         }
 
-        // Sprawdź, czy użytkownik już polubił to ogłoszenie
         if ($announcement->favoritedByUsers()->where('user_id', $user->id)->exists()) {
-            return response()->json(['message' => 'Ogłoszenie zostało już polubione przez tego użytkownika.'], 400);
+            $announcement->favoritedByUsers()->detach($user->id);
+            return response()->json(['success' => true, 'status' => 0]);
         }
 
-        // Dodaj polubienie ogłoszenia przez użytkownika
         $announcement->favoritedByUsers()->attach($user->id);
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'status' => 1]);
     }
+
 
 
 
