@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']); 
 
+    Route::get('/profile/data', [AuthController::class, 'profileData']);
 
     Route::get('/profile/announcements', [AnnouncementController::class, 'userAnnouncements']);
     Route::get('/profile/favoriteAnnouncements', [AnnouncementController::class, 'userFavoriteAnnouncements']);

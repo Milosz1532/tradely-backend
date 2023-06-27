@@ -246,7 +246,7 @@ class AnnouncementController extends Controller
             'description' => 'required',
             'price' => 'required',
             'user_id' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048' // Walidacja zdjęć (opcjonalna)
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
         $announcement->update($data);

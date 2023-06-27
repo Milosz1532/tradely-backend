@@ -14,14 +14,15 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\SignupRequest;
-
+use App\Models\Announcement;
+use App\Http\Resources\AnnouncementResource;
 
 
 
 class AuthController extends Controller
 {
-    public function signup(SignupRequest $request) {
-
+    public function signup(SignupRequest $request) 
+    {
         $data = $request->validated();
         $user = User::create([
             'login' => $data['login'],
@@ -35,18 +36,41 @@ class AuthController extends Controller
         return response(compact('user', 'token'));
     }
 
-    // public function signup(Request $request) 
-    // {
-    //     $data = [
-    //         'message' => trans('validation.login_required')
-    //       ];
-    //       return response()->json($data, 404);
-    // }
+
+
+    public function profileData(Request $request) 
+    {
+        $userId = $request->user()->id;
+        $user = Auth::user();
+
+        $allAnnouncementsCount = Announcement::where('user_id', $userId)->count();
+    
+        $activeAnnouncementsCount = Announcement::where('user_id', $userId)
+            ->where('status_id', 2)
+            ->count();
+    
+        $favoriteAnnouncementsCount = $user->favoriteAnnouncements()->count();
+    
+        $latestAnnouncements = Announcement::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->take(4)
+            ->get();
+    
+        $data = [
+            'all_announcements_count' => $allAnnouncementsCount,
+            'active_announcements_count' => $activeAnnouncementsCount,
+            'favorite_announcements_count' => $favoriteAnnouncementsCount,
+            'latest_announcements' => $latestAnnouncements,
+        ];
+    
+        return response()->json($data);
+    }
 
 
 
 
-    public function login(LoginRequest $request) {
+    public function login(LoginRequest $request)
+    {
         $credentials = $request->validated();
         if (!Auth::attempt($credentials)) {
             return response([
@@ -60,7 +84,8 @@ class AuthController extends Controller
     }
 
 
-    public function logout(Request $request) {
+    public function logout(Request $request) 
+    {
         $user = $request->user();
         $user->currentAccessToken()->delete();
         return response('',204);
