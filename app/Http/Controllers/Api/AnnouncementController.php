@@ -164,7 +164,10 @@ class AnnouncementController extends Controller
             'title' => $announcement->title,
             'description' => $announcement->description,
             'price' => $announcement->price,
-            'status' => $announcement->status,
+            'status' => [
+                'id' => $announcement->status->id,
+                'name' => $announcement->status->name,
+            ],
             'tags' => $announcement->tags->map(function ($tag) {
                 return ['id' => $tag->id, 'name' => $tag->name];
             })->values(),
@@ -199,7 +202,7 @@ class AnnouncementController extends Controller
     $categoryName = $request->input('category') ?? "all_categories";
     $keyword = $request->input('keyword');
 
-    $query = Announcement::query();
+    $query = Announcement::query()->where('status_id', 2);
 
     if ($location !== 'all_locations') {
         $query->where('location', $location);
