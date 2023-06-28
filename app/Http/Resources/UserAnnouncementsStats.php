@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 
-
-
-class AnnouncementResource extends JsonResource
+class UserAnnouncementsStats extends JsonResource
 {
-
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         $firstImage = $this->images->first();
@@ -32,17 +34,13 @@ class AnnouncementResource extends JsonResource
             'tags' => $this->tags->map(function ($tag) {
                 return ['id' => $tag->id, 'name' => $tag->name];
             })->values(),
-            'description' => $this->description,
-            'location' => $this->location,
             'price' => $this->price,
-            'user_id' => $this->user_id,
             'created_at' => optional($this->created_at)->format('d.m.Y H:i:s'),
 
             'updated_at' => optional($this->updated_at)->format('d.m.Y H:i:s'),
 
             'first_image' => $imageUrl,
             'favorite_count' => $this->favoritedByUsers->count(),
-            'is_favorited' => $isFavorited,
         ];
     }
 }

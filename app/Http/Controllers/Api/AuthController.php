@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\SignupRequest;
 use App\Models\Announcement;
-use App\Http\Resources\AnnouncementResource;
+use App\Http\Resources\UserAnnouncementsStats;
 
 
 
@@ -60,8 +60,9 @@ class AuthController extends Controller
             'all_announcements_count' => $allAnnouncementsCount,
             'active_announcements_count' => $activeAnnouncementsCount,
             'favorite_announcements_count' => $favoriteAnnouncementsCount,
-            'latest_announcements' => $latestAnnouncements,
+            'latest_announcements' => UserAnnouncementsStats::collection($latestAnnouncements),
         ];
+
     
         return response()->json($data);
     }

@@ -107,7 +107,7 @@ class AnnouncementController extends Controller
             'location' => 'required',
             'postal_code' => 'required',
             'phone_number' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp',
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
             'tags' => 'array', 
         ]);
     
@@ -126,7 +126,21 @@ class AnnouncementController extends Controller
     
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                // ...
+
+                $uuid = Uuid::uuid4()->toString();
+
+                // Konwersja obrazu na format .webp
+                $converted = Image::make($image)->encode('webp', 75);
+
+    
+                $path = 'public/announcements/' . $announcement->id . '_' . $uuid . '.webp';
+
+    
+                Storage::put($path, $converted->stream());
+    
+                $announcement->images()->create([
+                    'image_path' => $path
+                ]);
             }
         }
     
