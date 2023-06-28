@@ -202,7 +202,7 @@ class AnnouncementController extends Controller
     $categoryName = $request->input('category') ?? "all_categories";
     $keyword = $request->input('keyword');
 
-    $query = Announcement::query()->where('status_id', 2);
+    $query = Announcement::query();
 
     if ($location !== 'all_locations') {
         $query->where('location', $location);
