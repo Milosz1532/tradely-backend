@@ -68,8 +68,6 @@ class AuthController extends Controller
     }
 
 
-
-
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
@@ -78,12 +76,36 @@ class AuthController extends Controller
                 'message' => trans('validation.invalid_credentials'),
             ], 422);
         }
+        
         $user = Auth::user();
+        $permissions = $user->permissions->map(function ($permission) {
+            return [
+                'id' => $permission->id,
+                'name' => $permission->name,
+            ];
+        });
+        
         $token = $user->createToken('main')->plainTextToken;
-        $cookie = cookie('ACCESS_TOKEN', $token, 60); 
-        return response(compact('user', 'token'))->cookie($cookie);
+        $cookie = cookie('ACCESS_TOKEN', $token, 60);
+        
+        return response([
+            'user' => $user->only([
+                'id',
+                'login',
+                'first_name',
+                'last_name',
+                'birthday',
+                'email',
+                'email_verified_at',
+                'created_at',
+                'updated_at',
+            ]),
+            'token' => $token,
+            'permissions' => $permissions,
+        ])->cookie($cookie);
     }
-
+    
+    
 
     public function logout(Request $request) 
     {

@@ -26,14 +26,46 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
+
+//TEMPLATE
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::middleware('auth:sanctum')->get('/get', function (Request $request) {
+
+//         $user = $request->user();
+//         $user_permission = $user->permissions;
+    
+//         return response()->json($user_permission, 200);
+//     });
+    
+//     Route::middleware('permission:ANNOUNCEMENT.EDIT')->get('/get_edit', function () {
+//         // Ta trasa zostanie chroniona przez middleware
+//         // tylko dla użytkowników posiadających uprawnienie 'ANNOUNCEMENT.EDIT'
+//         return response()->json(['message' => 'Posiadasz wymagane uprawnienia.'], 200);
+//     });
+    
+//     Route::middleware('permission:ANNOUNCEMENT.DELETE')->get('/get_Delete', function () {
+//         // Ta trasa zostanie chroniona przez middleware
+//         // tylko dla użytkowników posiadających uprawnienie 'ANNOUNCEMENT.DELETE'
+//         return response()->json(['message' => 'Posiadasz wymagane uprawnienia.'], 200);
+//     });
+    
+
+// });
+
+
 Route::middleware('auth:sanctum')->get('/verify_token', function (Request $request) {
-
     $user = $request->user();
+    $permissions = $user->permissions->map(function ($permission) {
+        return $permission->only(['id', 'name']);
+    });
 
-    return response()->json($user, 200);
-
-
+    return response()->json([
+        'user' => $user->only(['id', 'login', 'first_name', 'last_name', 'birthday', 'email', 'email_verified_at', 'created_at', 'updated_at']),
+        'permissions' => $permissions,
+    ], 200);
 });
+
+
 
 
 

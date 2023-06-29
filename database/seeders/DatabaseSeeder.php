@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(PermissionsTableSeeder::class);
         // \App\Models\User::factory(50)->create();
 
         // \App\Models\User::factory()->create([

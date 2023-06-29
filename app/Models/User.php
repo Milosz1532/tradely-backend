@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Permission;
+
 
 class User extends Authenticatable
 {
@@ -33,6 +35,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Announcement::class, 'favorite_announcements', 'user_id', 'announcement_id')
             ->withTimestamps();
     }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'user_permissions');
+    }
+    
+
+    public function hasPermission($permissionName)
+    {
+        return $this->permissions->contains('name', $permissionName);
+    }
+
 
 
     /**
