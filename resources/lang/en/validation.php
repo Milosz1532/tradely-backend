@@ -4,6 +4,7 @@ return [
     'login_required' => 'The login field is required.',
     'login_string' => 'The login must be a string.',
     'login_max' => 'The login may not be greater than :max characters.',
+    'login_unique' => "The login has already been taken.",
     'email_required' => 'The email field is required.',
     'email_email' => 'The email must be a valid email address.',
     'email_unique' => 'The email has already been taken.',

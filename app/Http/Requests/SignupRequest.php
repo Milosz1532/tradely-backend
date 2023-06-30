@@ -23,7 +23,7 @@ class SignupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'login' => 'required|string|max:55',
+            'login' => 'required|string|unique:users,login|max:55',
             'email' => 'required|email|unique:users,email',
             'password' => [
                 'required',
@@ -43,6 +43,8 @@ class SignupRequest extends FormRequest
             'login.required' => trans('validation.login_required'),
             'login.string' => trans('validation.login_string'),
             'login.max' => trans('validation.login_max'),
+            'login.unique' => trans('validation.login_unique'),
+
             'email.required' => trans('validation.email_required'),
             'email.email' => trans('validation.email_email'),
             'email.unique' => trans('validation.email_unique'),
