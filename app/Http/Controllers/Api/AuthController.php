@@ -17,6 +17,10 @@ use App\Http\Requests\SignupRequest;
 use App\Models\Announcement;
 use App\Http\Resources\UserAnnouncementsStats;
 
+use Illuminate\Support\Facades\Mail;
+
+use App\Mail\UserVerification;
+
 
 
 class AuthController extends Controller
@@ -30,10 +34,26 @@ class AuthController extends Controller
             'password' => bcrypt($data['password']),
         ]);
 
-        $token = $user->createToken('main')->plainTextToken;
+        // $token = $user->createToken('main')->plainTextToken;  STARA WERSJA
+
+        if ($user) {
+            try {
+                Mail::mailer('smtp')->to($user->email)->send(new UserVerification($user));
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => "Udało się, potwierdź maila",
+                ],200);
+            }catch (\Exeption $err) {
+                return response()->json([
+                    'status' => 500,
+                    'error' => "A daj pan spokój",
+                ],500);
+            }
+        }
         
 
-        return response(compact('user', 'token'));
+        // return response(compact('user', 'token')); STARA WERSJA
     }
 
 
