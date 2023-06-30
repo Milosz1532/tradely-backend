@@ -65,6 +65,9 @@ Route::middleware('auth:sanctum')->get('/verify_token', function (Request $reque
     ], 200);
 });
 
+Route::middleware('auth:sanctum')->post('/checkPermission', [AuthController::class, 'checkPermission']);
+
+
 
 
 

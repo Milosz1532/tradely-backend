@@ -113,4 +113,20 @@ class AuthController extends Controller
         $user->currentAccessToken()->delete();
         return response('',204);
     }
+
+    public function checkPermission(Request $request)
+    {
+        $permission = $request->input('permission');
+
+        $user = $request->user();
+
+        
+
+        if ($user->hasPermission($permission)) {
+            return response()->json(['has_permission' => true], 200);
+        } else {
+            return response()->json(['has_permission' => false], 403);
+        }
+    }
 }
+
