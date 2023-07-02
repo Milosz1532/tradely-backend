@@ -19,9 +19,12 @@ class UserVerification extends Mailable
      * Create a new message instance.
      */
     public $user;
+    public $verificationUrl;
+
     public function __construct(User $user)
     {
         $this->user = $user;
+        $this->verificationUrl = env("FRONTEND_URL") . '/activateAccount?token=' . $user->verification_token;
     }
 
     /**
@@ -30,8 +33,8 @@ class UserVerification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'User Veification',
-            from: new Address('kontakt.tradely@gmail.com', 'John')
+            subject: 'Aktywacja konta',
+            from: new Address('kontakt.tradely@gmail.com', 'Tradely')
         );
     }
 

@@ -11,5 +11,7 @@ return [
     'password_required' => 'The password field is required.',
     'password_string' => 'The password must be a string.',
     'invalid_credentials' => 'Provided email address or password is incorrect',
+    'verify_email' => "Confirm your email address"
+
 
 ];

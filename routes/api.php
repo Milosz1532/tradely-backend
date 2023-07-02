@@ -23,7 +23,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile/announcements', [AnnouncementController::class, 'userAnnouncements']);
     Route::get('/profile/favoriteAnnouncements', [AnnouncementController::class, 'userFavoriteAnnouncements']);
     Route::post('/announcement/like', [AnnouncementController::class, 'likeAnnouncement']);
-
 });
 
 
@@ -74,6 +73,9 @@ Route::middleware('auth:sanctum')->post('/checkPermission', [AuthController::cla
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/activate-account', [AuthController::class, 'activateAccount']);
+
+
 
 
 Route::get('/announcements/search', [AnnouncementController::class, 'search'])->name('search_announcement');
