@@ -21,10 +21,10 @@ class UserVerification extends Mailable
     public $user;
     public $verificationUrl;
 
-    public function __construct(User $user)
+    public function __construct(User $user, $activation_code)
     {
         $this->user = $user;
-        $this->verificationUrl = env("FRONTEND_URL") . '/activateAccount?token=' . $user->verification_token;
+        $this->verificationUrl = env("FRONTEND_URL") . '/activateAccount?activation_code=' .$activation_code;
     }
 
     /**

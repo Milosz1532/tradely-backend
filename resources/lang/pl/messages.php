@@ -8,4 +8,9 @@ return [
     'uncorrect_email_token' => 'Nieprawidłowy token weryfikacyjny',
     'account_already_active' => 'Konto zostało już aktywowane',
     'account_email_success_verify' => 'Adres email został pomyślnie zweryfikowany',
+    'account_activation_success' => 'Konto zostało pomyślnie aktywowane',
+    'uncorrect_activation_code' => 'Nieprawidłowy kod aktywacyjny',
+    'activation_code_not_active' => 'Kod aktywacyjny jest nieaktywny',
+    'user_not_found' => 'Nie znaleziono użytkownika',
+    'validation_code_valid' => 'Kod weryfikacyjny jest prawidłowy',
 ];

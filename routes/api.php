@@ -74,6 +74,9 @@ Route::middleware('auth:sanctum')->post('/checkPermission', [AuthController::cla
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/activate-account', [AuthController::class, 'activateAccount']);
+Route::post('/check-verification-code',[AuthController::class, 'checkValidationCode']);
+Route::post('resend-verification-email',  [AuthController::class, 'resendVerificationEmail']);
+
 
 
 
