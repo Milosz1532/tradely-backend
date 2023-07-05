@@ -13,4 +13,7 @@ return [
     'activation_code_not_active' => 'The activation code is inactive',
     'user_not_found' => 'User not found',
     'validation_code_valid' => 'The validation code is valid',
+    'user_personal_data_update_success' => 'User personal data has been updated.',
+    'user_personal_data_update_faild' => 'An error occurred while updating user personal data.',
+
 ];

@@ -13,4 +13,6 @@ return [
     'activation_code_not_active' => 'Kod aktywacyjny jest nieaktywny',
     'user_not_found' => 'Nie znaleziono użytkownika',
     'validation_code_valid' => 'Kod weryfikacyjny jest prawidłowy',
+    'user_personal_data_update_success' => 'Dane osobowe użytkownika zostały zaktualizowane.',
+    'user_personal_data_update_faild' => 'Wystąpił błąd podczas aktualizacji danych osobowych',
 ];

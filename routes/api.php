@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']); 
 
     Route::get('/profile/data', [AuthController::class, 'profileData']);
+    Route::put('/profile/update/personal', [AuthController::class, 'updatePersonalData']);
 
     Route::get('/profile/announcements', [AnnouncementController::class, 'userAnnouncements']);
     Route::get('/profile/favoriteAnnouncements', [AnnouncementController::class, 'userFavoriteAnnouncements']);
@@ -59,7 +60,7 @@ Route::middleware('auth:sanctum')->get('/verify_token', function (Request $reque
     });
 
     return response()->json([
-        'user' => $user->only(['id', 'login', 'first_name', 'last_name', 'birthday', 'email', 'email_verified_at', 'created_at', 'updated_at']),
+        'user' => $user->only(['id', 'login', 'first_name', 'last_name', 'birthday', 'email', 'email_verified_at', 'created_at', 'updated_at', 'note']),
         'permissions' => $permissions,
     ], 200);
 });

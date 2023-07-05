@@ -71,8 +71,6 @@ class AuthController extends Controller
         }
     }
     
-    
-
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
@@ -111,6 +109,7 @@ class AuthController extends Controller
                 'email_verified_at',
                 'created_at',
                 'updated_at',
+                'note'
             ]),
             'token' => $token,
             'permissions' => $permissions,
@@ -318,5 +317,30 @@ class AuthController extends Controller
     
         return response()->json($data);
     }
+
+    public function updatePersonalData(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            $validatedData = $request->validate([
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'birthday' => 'required|date',
+            ]);
+            
+            $user->update([
+                'first_name' => $validatedData['first_name'],
+                'last_name' => $validatedData['last_name'],
+                'birthday' => $validatedData['birthday'],
+            ]);
+            
+            return response()->json(['message' => trans('messages.user_personal_data_update_success')], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => trans('messages.user_personal_data_update_faild')], 500);
+        }
+    }
+    
+    
 }
 
