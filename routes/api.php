@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
+use Illuminate\Broadcasting\BroadcastController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -96,6 +97,12 @@ Route::get('/categories', [CategoryController::class, 'index']);
 
 
 // CHAT
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/broadcasting/auth', [BroadcastController::class, 'authenticate']);
+});
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('chat')->group(function () {
         Route::post('start', [ChatController::class, 'startChat']);

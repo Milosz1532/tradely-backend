@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\GroupChatMessage;
+use App\Events\MessageSent;
+
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -56,19 +59,48 @@ class ChatController extends Controller
             'content' => 'required|string',
         ]);
 
-        $conversationId = $request->conversation_id;
-        $userId = $request->user()->id;
-        $content = $request->content;
+        $conversation_id = $request->conversation_id;
 
-        $message = new Message();
-        $message->conversation_id = $conversationId;
-        $message->user_id = $userId;
-        $message->content = $content;
-        $message->save();
+        $conversation = Conversation::findOrFail($conversation_id);
+        if ($conversation) {
+            $user = $request->user();
+            $user_id = $request->user()->id;
+            $announcement_owner_id = $conversation->Announcement->user_id;
+            $conversation_user_id = $conversation->user_id;
+            $recipient_id = $announcement_owner_id == $user_id ? $conversation_user_id : $announcement_owner_id;
+            
 
-        return response()->json([
-            'message_id' => $message->id,
-        ]);
+            $content = $request->content;
+
+            $message = new Message();
+            $message->conversation_id = $conversation_id;
+            $message->user_id = $user_id;
+            $message->content = $content;
+            $message->save();
+
+            $eventMessage = [
+                'conversation_id' => $conversation_id,
+                'message' => $content,
+            ];
+            
+            event(new MessageSent($eventMessage, $recipient_id));
+            
+    
+    
+            return response()->json([
+                'success' => true,
+            ]);
+    
+
+
+            // MessageSent
+            
+            // return "Wyślij do: ".$recipient_id + "||| Twoje ID: " + $user_id + "||| Jego ID: " + $announcement_owner_id;
+        }
+
+
+
+
     }
 
     public function getConversations(Request $request)
