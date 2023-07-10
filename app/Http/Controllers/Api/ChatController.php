@@ -47,13 +47,32 @@ class ChatController extends Controller
     public function getMessages($conversationId)
     {
         $conversation = Conversation::findOrFail($conversationId);
-
+    
         $messages = $conversation->messages;
-
+    
+        // Zaktualizuj flagi is_delivered i is_read dla wyświetlonych wiadomości
+        $messagesToUpdate = [];
+        foreach ($messages as $message) {
+            if (!$message->is_delivered || !$message->is_read) {
+                $message->is_delivered = true;
+                $message->is_read = true;
+                $messagesToUpdate[] = $message;
+            }
+        }
+    
+        if (!empty($messagesToUpdate)) {
+            DB::transaction(function () use ($messagesToUpdate) {
+                foreach ($messagesToUpdate as $message) {
+                    $message->save();
+                }
+            });
+        }
+    
         return response()->json([
             'messages' => $messages,
         ]);
     }
+    
 
     public function sendMessage(Request $request)
     {
@@ -82,6 +101,7 @@ class ChatController extends Controller
             $message->conversation_id = $conversation_id;
             $message->user_id = $user_id;
             $message->content = $content;
+            $message->is_sent = true;
             $message->save();
 
             $eventMessage = [
@@ -93,80 +113,83 @@ class ChatController extends Controller
             ];
             
             event(new MessageSent($eventMessage, $recipient_id));
-            
-    
     
             return response()->json($eventMessage);
-
-    
-
-
-            // MessageSent
-            
-            // return "Wyślij do: ".$recipient_id + "||| Twoje ID: " + $user_id + "||| Jego ID: " + $announcement_owner_id;
         }
-
-
-
-
     }
 
+    public function markMessageAsDelivered(Request $request, $message_id)
+    {
+        $request->merge(['message_id' => $message_id]);
+
+        $request->validate([
+            'message_id' => 'required|exists:messages,id',
+        ]);
+    
+        $message = Message::where('id', $message_id)
+            ->where('is_delivered', false)
+            ->update(['is_delivered' => true]);
+    
+        if ($message) {
+            return response()->json(['message' => 'Message marked as delivered']);
+        } else {
+            return response()->json(['message' => 'Failed to mark message as delivered'], 400);
+        }
+    }
+    
+    
+
+    public function markMessageAsRead(Request $request, $message_id)
+    {
+        $request->merge(['message_id' => $message_id]);
+
+        $request->validate([
+            'message_id' => 'required|exists:messages,id',
+        ]);
+    
+        $message = Message::where('id', $message_id)
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'is_delivered' => true]);
+    
+        if ($message) {
+            return response()->json(['message' => 'Message marked as read']);
+        } else {
+            return response()->json(['message' => 'Failed to mark message as read'], 400);
+        }
+    }
+    
+
     public function getConversations(Request $request)
-{
-    $userId = $request->user()->id;
+    {
+        $userId = $request->user()->id;
 
-    $conversations = Conversation::with(['announcement', 'messages' => function ($query) {
-        $query->latest()->take(1);
-    }])
-        ->where(function ($query) use ($userId) {
-            $query->where('user_id', $userId)
-                ->orWhereHas('announcement', function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                });
-        })
-        ->get();
+        $conversations = Conversation::with(['announcement', 'messages' => function ($query) {
+            $query->latest()->take(1);
+        }])
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('announcement', function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    });
+            })
+            ->get();
 
-    $conversationsData = $conversations->map(function ($conversation) {
-        $firstImage = $conversation->announcement->images->first();
-        $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
+        $conversationsData = $conversations->map(function ($conversation) {
+            $firstImage = $conversation->announcement->images->first();
+            $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
 
-        return [
-            'id' => $conversation->id,
-            'announcement_title' => $conversation->announcement->title,
-            'announcement_first_image' => $imageUrl,
-            'latest_message' => $conversation->messages->last(),
-        ];
-    });
+            return [
+                'id' => $conversation->id,
+                'announcement_title' => $conversation->announcement->title,
+                'announcement_first_image' => $imageUrl,
+                'latest_message' => $conversation->messages->last(),
+            ];
+        });
 
-    return response()->json([
-        'conversations' => $conversationsData,
-    ]);
-}
-
-
-    
-    
-
-
-
-    // public function getConversations(Request $request)
-    // {
-    //     $userId = $request->user()->id;
-
-    //     $conversations = Conversation::where(function ($query) use ($userId) {
-    //         $query->where('user_id', $userId)
-    //             ->orWhereHas('announcement', function ($query) use ($userId) {
-    //                 $query->where('user_id', $userId);
-    //             });
-    //     })->get();
-
-    //     return response()->json([
-    //         'conversations' => $conversations,
-    //     ]);
-    // }
-
-
-    
+        return response()->json([
+            'conversations' => $conversationsData,
+        ]);
+    }
 
 
 }

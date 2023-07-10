@@ -11,7 +11,7 @@ class CreateConversationsTable extends Migration
         Schema::create('conversations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('announcement_id');
-            $table->unsignedBigInteger('user_id'); // Dodatkowe pole dla użytkownika, który rozpoczął konwersację
+            $table->unsignedBigInteger('user_id'); 
             $table->timestamps();
             
             $table->foreign('announcement_id')->references('id')->on('announcements');

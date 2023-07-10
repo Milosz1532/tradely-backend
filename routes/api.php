@@ -109,5 +109,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('conversations', [ChatController::class, 'getConversations']);
         Route::get('conversations/{conversationId}/messages', [ChatController::class, 'getMessages']);
         Route::post('messages', [ChatController::class, 'sendMessage']);
+
+        Route::put('messages/{message_id}/delivered', [ChatController::class, 'markMessageAsDelivered']);
+        Route::put('messages/{message_id}/read', [ChatController::class, 'markMessageAsRead']);
     });
 });
