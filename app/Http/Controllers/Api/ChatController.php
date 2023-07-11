@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\GroupChatMessage;
 use App\Events\MessageSent;
+use App\Events\MessageDelivered;
+use App\Events\MessageRead;
 
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -44,8 +45,16 @@ class ChatController extends Controller
         ]);
     }
 
-    public function getMessages($conversationId)
+    public function getMessages(Request $request, $conversationId)
     {
+        $request->merge(['conversationId' => $conversationId]);
+
+
+        $request->validate([
+            'conversationId' => 'required|exists:conversations,id',
+        ]);
+
+
         $conversation = Conversation::findOrFail($conversationId);
     
         $messages = $conversation->messages;
@@ -53,7 +62,7 @@ class ChatController extends Controller
         // Zaktualizuj flagi is_delivered i is_read dla wyświetlonych wiadomości
         $messagesToUpdate = [];
         foreach ($messages as $message) {
-            if (!$message->is_delivered || !$message->is_read) {
+            if (($message->user_id !== $request->user()->id) && ( !$message->is_delivered || !$message->is_read )) {
                 $message->is_delivered = true;
                 $message->is_read = true;
                 $messagesToUpdate[] = $message;
@@ -67,11 +76,41 @@ class ChatController extends Controller
                 }
             });
         }
+        $user_id = $request->user()->id;
+
+
+        $announcement_owner_id = $conversation->Announcement->user_id;
+        $conversation_user_id = $conversation->user_id;
+        $recipient_id = $announcement_owner_id == $user_id ? $conversation_user_id : $announcement_owner_id;
+        event(new MessageRead($recipient_id,'all',$conversationId));
+
+        $formattedMessages = $messages->map(function ($message) {
+            $status = '';
+            if ($message->is_read) {
+                $status = 3;
+            } elseif ($message->is_delivered) {
+                $status = 2;
+            } elseif ($message->is_sent) {
+                $status = 1;
+            }
+
+            
+    
+            return [
+                'id' => $message->id,
+                'conversation_id' => $message->conversation_id,
+                'user_id' => $message->user_id,
+                'content' => $message->content,
+                'created_at' => $message->created_at,
+                'status' => $status,
+            ];
+        });
     
         return response()->json([
-            'messages' => $messages,
+            'messages' => $formattedMessages,
         ]);
     }
+    
     
 
     public function sendMessage(Request $request)
@@ -122,18 +161,34 @@ class ChatController extends Controller
     {
         $request->merge(['message_id' => $message_id]);
 
+
         $request->validate([
             'message_id' => 'required|exists:messages,id',
         ]);
     
         $message = Message::where('id', $message_id)
-            ->where('is_delivered', false)
-            ->update(['is_delivered' => true]);
-    
+        ->where('is_delivered', false)
+        ->first();
+
         if ($message) {
-            return response()->json(['message' => 'Message marked as delivered']);
-        } else {
-            return response()->json(['message' => 'Failed to mark message as delivered'], 400);
+            $message->is_delivered = true;
+            $message->save();
+
+            $conversation_id = $message->conversation_id;
+
+            $conversation = Conversation::findOrFail($conversation_id);
+            if ($conversation) {
+                $user = $request->user();
+                $user_id = $request->user()->id;
+    
+    
+                $announcement_owner_id = $conversation->Announcement->user_id;
+                $conversation_user_id = $conversation->user_id;
+                $recipient_id = $announcement_owner_id == $user_id ? $conversation_user_id : $announcement_owner_id;
+
+
+                event(new MessageDelivered($recipient_id, $message->id, $conversation_id));
+            }   
         }
     }
     
@@ -143,19 +198,37 @@ class ChatController extends Controller
     {
         $request->merge(['message_id' => $message_id]);
 
+
         $request->validate([
             'message_id' => 'required|exists:messages,id',
         ]);
     
         $message = Message::where('id', $message_id)
-            ->where('is_read', false)
-            ->update(['is_read' => true, 'is_delivered' => true]);
-    
+        ->where('is_read', false)
+        ->first();
+
         if ($message) {
-            return response()->json(['message' => 'Message marked as read']);
-        } else {
-            return response()->json(['message' => 'Failed to mark message as read'], 400);
+            $message->is_delivered = true;
+            $message->is_read = true;
+            $message->save();
+
+            $conversation_id = $message->conversation_id;
+
+            $conversation = Conversation::findOrFail($conversation_id);
+            if ($conversation) {
+                $user = $request->user();
+                $user_id = $request->user()->id;
+    
+    
+                $announcement_owner_id = $conversation->Announcement->user_id;
+                $conversation_user_id = $conversation->user_id;
+                $recipient_id = $announcement_owner_id == $user_id ? $conversation_user_id : $announcement_owner_id;
+
+
+                event(new MessageRead($recipient_id, $message->id, $conversation_id));
+            }   
         }
+
     }
     
 

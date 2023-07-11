@@ -49,7 +49,11 @@ class Handler extends ExceptionHandler
                 } elseif ($e instanceof QueryException) {
                     $statusCode = 500;
                     $message = 'Wystąpił błąd bazy danych. Spróbuj ponownie później.';
+                } elseif ($e instanceof AuthenticationException) {
+                    $statusCode = 401;
+                    $message = 'Nieautoryzowany dostęp.';
                 }
+        
 
                 return response()->json([
                     'error' => $message,
