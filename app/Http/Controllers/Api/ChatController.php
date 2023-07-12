@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Conversation;
+use App\Models\Announcement;
 use App\Models\Message;
 
 use Illuminate\Support\Facades\Storage;
@@ -24,10 +25,12 @@ class ChatController extends Controller
     {
         $request->validate([
             'announcement_id' => 'required|exists:announcements,id',
+            'content' => 'required|string',
         ]);
 
         $announcementId = $request->announcement_id;
         $userId = $request->user()->id;
+        $content = $request->content;
 
         $conversation = Conversation::where('announcement_id', $announcementId)
             ->where('user_id', $userId)
@@ -40,10 +43,42 @@ class ChatController extends Controller
             $conversation->save();
         }
 
-        return response()->json([
+        $message = new Message();
+        $message->conversation_id = $conversation->id;
+        $message->user_id = $userId;
+        $message->content = $content;
+        $message->save();
+
+        $eventMessage = [
+            'id' => $message->id,
             'conversation_id' => $conversation->id,
-        ]);
+            'content' => $content,
+            'created_at' => $message->created_at,
+            'user_id' => $userId,
+        ];
+
+        $firstImage = $conversation->announcement->images->first();
+        $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
+
+        $conversationData = [
+            'id' => $conversation->id,
+            'announcement_title' => $conversation->announcement->title,
+            'announcement_first_image' => $imageUrl,
+            'latest_message' => $conversation->messages->last(),
+        ];
+
+
+        $announcement_owner_id = $conversation->Announcement->user_id;
+        $conversation_user_id = $conversation->user_id;
+        $recipient_id = $announcement_owner_id == $userId ? $conversation_user_id : $announcement_owner_id;
+        
+
+        event(new MessageSent($eventMessage, $recipient_id));
+
+
+        return response()->json(['conversation' => $conversationData, 'message' => $eventMessage]);
     }
+
 
     public function getMessages(Request $request, $conversationId)
     {
@@ -262,6 +297,70 @@ class ChatController extends Controller
         return response()->json([
             'conversations' => $conversationsData,
         ]);
+    }
+
+    public function newConversationData(Request $request, $announcement_id)
+    {
+        $request->merge(['announcement_id' => $announcement_id]);
+        $request->validate([
+            'announcement_id' => 'required|exists:announcements,id',
+        ]);
+
+        $user = $request->user();
+        $userId = $user->id;
+
+        $announcement = Announcement::findOrFail($announcement_id);
+        if ($announcement->user_id === $user->id) {
+            return response()->json(['error' => 'Nie możesz rozpocząć konwersacji ze swoim własnym ogłoszeniem.', 'status' => 0]);
+        }
+
+        // Sprawdzenie, czy użytkownik nie prowadzi już konwersacji z tym ogłoszeniem
+        $existingConversation = Conversation::where('announcement_id', $announcement_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existingConversation) {
+            $firstImage = $existingConversation->announcement->images->first();
+            $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
+
+            // return [
+            //     'id' => $existingConversation->id,
+            //     'announcement_title' => $existingConversation->announcement->title,
+            //     'announcement_first_image' => $imageUrl,
+            //     'latest_message' => $existingConversation->messages->last(),
+            // ];
+            return response()->json([
+                'id' => $existingConversation->id,
+                'announcement_title' => $existingConversation->announcement->title,
+                'announcement_first_image' => $imageUrl,
+                'latest_message' => $existingConversation->messages->last(),
+            ],202);
+            // return response()->json(['error' => 'Już prowadzisz konwersację z tym ogłoszeniem.', 'status' => 1]);
+        }
+        
+
+        $formattedAnnouncement = [
+            'id' => $announcement->id,
+            'title' => $announcement->title,
+            'description' => $announcement->description,
+            // ... inne dane ogłoszenia ...
+        ];
+
+        $formattedUser = [
+            'id' => $announcement->user->id,
+            'name' => $announcement->user->name,
+            'email' => $announcement->user->email,
+            // ... inne dane użytkownika ...
+        ];
+
+        return response()->json([
+            'announcement' => $formattedAnnouncement,
+            'user' => $formattedUser,
+        ]);
+
+
+        // Zwróc tylko dane ogłoszenia i uzytkownika
+
     }
 
 
