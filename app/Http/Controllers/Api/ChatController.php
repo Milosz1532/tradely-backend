@@ -270,17 +270,10 @@ class ChatController extends Controller
 
     public function getConversations(Request $request)
     {
+
         $userId = $request->user()->id;
-    
-        $conversations = Conversation::with(['announcement', 'messages' => function ($query) {
-            $query->latest()->take(1);
-        }])
-            ->where(function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                    ->orWhereHas('announcement', function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    });
-            })
+
+        $conversations = Conversation::with(['announcement', 'messages'])
             ->get();
     
         $conversationsData = $conversations->map(function ($conversation) use ($userId) {
@@ -313,6 +306,7 @@ class ChatController extends Controller
             'conversations' => $conversationsData,
         ]);
     }
+    
     
 
     public function newConversationData(Request $request, $announcement_id)
