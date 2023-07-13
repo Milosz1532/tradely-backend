@@ -81,6 +81,7 @@ class AuthController extends Controller
         }
         
         $user = Auth::user();
+
         
         if (!$user->hasVerifiedEmail()) {
             return response([
@@ -94,7 +95,10 @@ class AuthController extends Controller
                 'name' => $permission->name,
             ];
         });
+
         
+        $user->save();
+
         $token = $user->createToken('main')->plainTextToken;
         $cookie = cookie('ACCESS_TOKEN', $token, 60);
         

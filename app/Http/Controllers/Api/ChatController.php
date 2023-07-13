@@ -6,6 +6,7 @@ use App\Events\MessageSent;
 use App\Events\MessageDelivered;
 use App\Events\MessageRead;
 
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -13,10 +14,13 @@ use Illuminate\Http\Request;
 use App\Models\Conversation;
 use App\Models\Announcement;
 use App\Models\Message;
+use App\Models\User;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
+use Cache;
+use Carbon\Carbon;
 
 
 class ChatController extends Controller
@@ -80,24 +84,23 @@ class ChatController extends Controller
     }
 
 
+
+    
     public function getMessages(Request $request, $conversationId)
     {
         $request->merge(['conversationId' => $conversationId]);
-
-
+    
         $request->validate([
             'conversationId' => 'required|exists:conversations,id',
         ]);
-
-
-        $conversation = Conversation::findOrFail($conversationId);
     
+        $conversation = Conversation::findOrFail($conversationId);
         $messages = $conversation->messages;
     
         // Zaktualizuj flagi is_delivered i is_read dla wyświetlonych wiadomości
         $messagesToUpdate = [];
         foreach ($messages as $message) {
-            if (($message->user_id !== $request->user()->id) && ( !$message->is_delivered || !$message->is_read )) {
+            if (($message->user_id !== $request->user()->id) && (!$message->is_delivered || !$message->is_read)) {
                 $message->is_delivered = true;
                 $message->is_read = true;
                 $messagesToUpdate[] = $message;
@@ -112,13 +115,12 @@ class ChatController extends Controller
             });
         }
         $user_id = $request->user()->id;
-
-
+    
         $announcement_owner_id = $conversation->Announcement->user_id;
         $conversation_user_id = $conversation->user_id;
         $recipient_id = $announcement_owner_id == $user_id ? $conversation_user_id : $announcement_owner_id;
-        event(new MessageRead($recipient_id,'all',$conversationId));
-
+        event(new MessageRead($recipient_id, 'all', $conversationId));
+    
         $formattedMessages = $messages->map(function ($message) {
             $status = '';
             if ($message->is_read) {
@@ -128,8 +130,6 @@ class ChatController extends Controller
             } elseif ($message->is_sent) {
                 $status = 1;
             }
-
-            
     
             return [
                 'id' => $message->id,
@@ -145,6 +145,7 @@ class ChatController extends Controller
             'messages' => $formattedMessages,
         ]);
     }
+    
     
     
 
@@ -270,7 +271,7 @@ class ChatController extends Controller
     public function getConversations(Request $request)
     {
         $userId = $request->user()->id;
-
+    
         $conversations = Conversation::with(['announcement', 'messages' => function ($query) {
             $query->latest()->take(1);
         }])
@@ -281,23 +282,38 @@ class ChatController extends Controller
                     });
             })
             ->get();
-
-        $conversationsData = $conversations->map(function ($conversation) {
+    
+        $conversationsData = $conversations->map(function ($conversation) use ($userId) {
             $firstImage = $conversation->announcement->images->first();
             $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
-
+    
+            $announcement_owner_id = $conversation->Announcement->user_id;
+            $conversation_user_id = $conversation->user_id;
+            $recipient_id = $announcement_owner_id == $userId ? $conversation_user_id : $announcement_owner_id;
+    
+            $user_last_activity = false;
+    
+            if (Cache::has('user-is-online-' . $recipient_id)) {
+                $user_last_activity = true;
+            } else {
+                $recipient = User::findOrFail($recipient_id);
+                $user_last_activity = Carbon::parse($recipient->last_seen)->diffForHumans();
+            }
+    
             return [
                 'id' => $conversation->id,
                 'announcement_title' => $conversation->announcement->title,
                 'announcement_first_image' => $imageUrl,
                 'latest_message' => $conversation->messages->last(),
+                'user_last_activity' => $user_last_activity,
             ];
         });
-
+    
         return response()->json([
             'conversations' => $conversationsData,
         ]);
     }
+    
 
     public function newConversationData(Request $request, $announcement_id)
     {

@@ -29,7 +29,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'email_verified_at',
-        'note'
+        'note',
+        'last_login',
     ];
 
     public function announcements()
