@@ -97,7 +97,6 @@ class ChatController extends Controller
         $conversation = Conversation::findOrFail($conversationId);
         $messages = $conversation->messages;
     
-        // Zaktualizuj flagi is_delivered i is_read dla wyświetlonych wiadomości
         $messagesToUpdate = [];
         foreach ($messages as $message) {
             if (($message->user_id !== $request->user()->id) && (!$message->is_delivered || !$message->is_read)) {
@@ -120,6 +119,15 @@ class ChatController extends Controller
         $conversation_user_id = $conversation->user_id;
         $recipient_id = $announcement_owner_id == $user_id ? $conversation_user_id : $announcement_owner_id;
         event(new MessageRead($recipient_id, 'all', $conversationId));
+
+        $user_last_activity = false;
+    
+        if (Cache::has('user-is-online-' . $recipient_id)) {
+            $user_last_activity = true;
+        } else {
+            $recipient = User::findOrFail($recipient_id);
+            $user_last_activity = Carbon::parse($recipient->last_seen)->diffForHumans();
+        }
     
         $formattedMessages = $messages->map(function ($message) {
             $status = '';
@@ -143,6 +151,7 @@ class ChatController extends Controller
     
         return response()->json([
             'messages' => $formattedMessages,
+            'user_last_activity' => $user_last_activity,
         ]);
     }
     
@@ -270,11 +279,9 @@ class ChatController extends Controller
 
     public function getConversations(Request $request)
     {
-
         $userId = $request->user()->id;
-
-        $conversations = Conversation::with(['announcement', 'messages'])
-            ->get();
+    
+        $conversations = Conversation::with(['announcement', 'messages'])->get();
     
         $conversationsData = $conversations->map(function ($conversation) use ($userId) {
             $firstImage = $conversation->announcement->images->first();
@@ -284,21 +291,34 @@ class ChatController extends Controller
             $conversation_user_id = $conversation->user_id;
             $recipient_id = $announcement_owner_id == $userId ? $conversation_user_id : $announcement_owner_id;
     
-            $user_last_activity = false;
+
     
-            if (Cache::has('user-is-online-' . $recipient_id)) {
-                $user_last_activity = true;
-            } else {
-                $recipient = User::findOrFail($recipient_id);
-                $user_last_activity = Carbon::parse($recipient->last_seen)->diffForHumans();
+            $latestMessage = $conversation->messages->last() ?? null;
+            $status = null;
+    
+            if ($latestMessage) {
+                if ($latestMessage->is_read) {
+                    $status = 3;
+                } elseif ($latestMessage->is_delivered) {
+                    $status = 2;
+                } elseif ($latestMessage->is_sent) {
+                    $status = 1;
+                }
             }
     
             return [
                 'id' => $conversation->id,
                 'announcement_title' => $conversation->announcement->title,
                 'announcement_first_image' => $imageUrl,
-                'latest_message' => $conversation->messages->last(),
-                'user_last_activity' => $user_last_activity,
+                'announcement_price' => $conversation->announcement->price,
+                'latest_message' => $latestMessage ? [
+                    'id' => $latestMessage->id,
+                    'conversation_id' => $latestMessage->conversation_id,
+                    'user_id' => $latestMessage->user_id,
+                    'content' => $latestMessage->content,
+                    'created_at' => $latestMessage->created_at,
+                    'status' => $status,
+                ] : null,
             ];
         });
     
@@ -306,6 +326,7 @@ class ChatController extends Controller
             'conversations' => $conversationsData,
         ]);
     }
+    
     
     
 
@@ -324,7 +345,6 @@ class ChatController extends Controller
             return response()->json(['error' => 'Nie możesz rozpocząć konwersacji ze swoim własnym ogłoszeniem.', 'status' => 0]);
         }
 
-        // Sprawdzenie, czy użytkownik nie prowadzi już konwersacji z tym ogłoszeniem
         $existingConversation = Conversation::where('announcement_id', $announcement_id)
             ->where('user_id', $user->id)
             ->first();
@@ -333,34 +353,35 @@ class ChatController extends Controller
             $firstImage = $existingConversation->announcement->images->first();
             $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
 
-            // return [
-            //     'id' => $existingConversation->id,
-            //     'announcement_title' => $existingConversation->announcement->title,
-            //     'announcement_first_image' => $imageUrl,
-            //     'latest_message' => $existingConversation->messages->last(),
-            // ];
+
             return response()->json([
                 'id' => $existingConversation->id,
                 'announcement_title' => $existingConversation->announcement->title,
                 'announcement_first_image' => $imageUrl,
                 'latest_message' => $existingConversation->messages->last(),
             ],202);
-            // return response()->json(['error' => 'Już prowadzisz konwersację z tym ogłoszeniem.', 'status' => 1]);
+        }
+
+        $user_last_activity = false;
+    
+        if (Cache::has('user-is-online-' . $announcement->user->id)) {
+            $user_last_activity = true;
+        } else {
+            $user_last_activity = Carbon::parse($announcement->user->last_seen)->diffForHumans();
         }
         
 
         $formattedAnnouncement = [
             'id' => $announcement->id,
             'title' => $announcement->title,
-            'description' => $announcement->description,
-            // ... inne dane ogłoszenia ...
+            'price' => $announcement->price
         ];
 
         $formattedUser = [
             'id' => $announcement->user->id,
             'name' => $announcement->user->name,
             'email' => $announcement->user->email,
-            // ... inne dane użytkownika ...
+            'user_last_activity' => $user_last_activity,
         ];
 
         return response()->json([
@@ -369,7 +390,6 @@ class ChatController extends Controller
         ]);
 
 
-        // Zwróc tylko dane ogłoszenia i uzytkownika
 
     }
 

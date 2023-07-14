@@ -16,6 +16,10 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\SignupRequest;
 use App\Models\Announcement;
 use App\Models\UserActivationCode;
+use App\Models\Message;
+use App\Models\Conversation;
+
+
 use App\Http\Resources\UserAnnouncementsStats;
 
 use Illuminate\Support\Facades\Mail;
@@ -344,6 +348,38 @@ class AuthController extends Controller
             return response()->json(['error' => trans('messages.user_personal_data_update_faild')], 500);
         }
     }
+    public function verifyUser(Request $request)
+    {
+        $user = $request->user();
+        $permissions = $user->permissions->map(function ($permission) {
+            return $permission->only(['id', 'name']);
+        });
+    
+        // Pobierz konwersacje użytkownika
+        $conversations = Conversation::where('user_id', $user->id)
+            ->orWhereHas('announcement', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->get();
+    
+        $unreadMessages = [];
+    
+        foreach ($conversations as $conversation) {
+            $unread = $conversation->messages->where('user_id', '!=', $user->id)
+                ->where('is_read', false)
+                ->count();
+    
+            if ($unread > 0) {
+                $unreadMessages[$conversation->id] = $unread;
+            }
+        }
+    
+        return response()->json([
+            'user' => $user->only(['id', 'login', 'first_name', 'last_name', 'birthday', 'email', 'email_verified_at', 'created_at', 'updated_at', 'note']),
+            'permissions' => $permissions,
+            'unread_messages' => $unreadMessages,
+        ], 200);
+    }
+    
     
     
 }

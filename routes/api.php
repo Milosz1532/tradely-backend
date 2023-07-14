@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Crypt;
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    // Route::get('/user', function (Request $request) {
+    //     return $request->user();
+    // });
     Route::post('/logout', [AuthController::class, 'logout']); 
 
     Route::get('/profile/data', [AuthController::class, 'profileData']);
@@ -56,17 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // });
 
 
-Route::middleware('auth:sanctum')->get('/verify_token', function (Request $request) {
-    $user = $request->user();
-    $permissions = $user->permissions->map(function ($permission) {
-        return $permission->only(['id', 'name']);
-    });
-
-    return response()->json([
-        'user' => $user->only(['id', 'login', 'first_name', 'last_name', 'birthday', 'email', 'email_verified_at', 'created_at', 'updated_at', 'note']),
-        'permissions' => $permissions,
-    ], 200);
-});
+Route::middleware('auth:sanctum')->get('/verify_token', [AuthController::class, 'verifyUser']);
 
 Route::middleware('auth:sanctum')->post('/checkPermission', [AuthController::class, 'checkPermission']);
 
