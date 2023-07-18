@@ -8,17 +8,22 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\KeywordSuggestionController;
+
+
+
 use Illuminate\Broadcasting\BroadcastController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
+use App\Http\Middleware\ThrottleSuggestions;
+
+
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    // Route::get('/user', function (Request $request) {
-    //     return $request->user();
-    // });
+
     Route::post('/logout', [AuthController::class, 'logout']); 
 
     Route::get('/profile/data', [AuthController::class, 'profileData']);
@@ -107,3 +112,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('messages/{message_id}/read', [ChatController::class, 'markMessageAsRead']);
     });
 });
+
+
+// Suggestions
+
+Route::middleware('throttle:suggestions')->get('/suggestions', [KeywordSuggestionController::class, 'getSuggestions']);
