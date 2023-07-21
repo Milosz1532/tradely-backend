@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Announcement;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\KeywordSuggestion;
 
 class AnnouncementController extends Controller
 {
@@ -197,35 +198,37 @@ class AnnouncementController extends Controller
 
 
     public function search(Request $request)
-{
-    $location = $request->input('location') ?? "all_locations";
-    $categoryName = $request->input('category') ?? "all_categories";
-    $keyword = $request->input('keyword');
+    {
+        $location = $request->input('location') ?? "all_locations";
+        $categoryName = $request->input('category') ?? "all_categories";
+        $keyword = $request->input('keyword');
 
-    $query = Announcement::query()->where('status_id', 2);
+        $query = Announcement::query()->where('status_id', 2);
 
 
-    if ($location !== 'all_locations') {
-        $query->where('location', $location);
+        if ($location !== 'all_locations') {
+            $query->where('location', $location);
+        }
+
+        if ($categoryName !== 'all_categories') {
+            $category = Category::where('name', $categoryName)->first();
+
+            $query->where('category_id', $category->id);
+        }
+
+        if (!empty($keyword)) {
+            $query->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%$keyword%")
+                    ->orWhere('description', 'like', "%$keyword%");
+            });
+            $keywordSuggestion = new KeywordSuggestion();
+            $keywordSuggestion->addOrUpdateSuggestion($keyword);
+        }
+
+        $announcements = $query->orderBy('id', 'desc')->paginate(5);
+
+        return AnnouncementResource::collection($announcements);
     }
-
-    if ($categoryName !== 'all_categories') {
-        $category = Category::where('name', $categoryName)->first();
-
-        $query->where('category_id', $category->id);
-    }
-
-    if (!empty($keyword)) {
-        $query->where(function ($query) use ($keyword) {
-            $query->where('title', 'like', "%$keyword%")
-                ->orWhere('description', 'like', "%$keyword%");
-        });
-    }
-
-    $announcements = $query->orderBy('id', 'desc')->paginate(5);
-
-    return AnnouncementResource::collection($announcements);
-}
 
 
     public function likeAnnouncement(Request $request)
