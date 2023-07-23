@@ -65,12 +65,12 @@ class AuthController extends Controller
                 ], 200);
             } catch (\Exception $err) {
                 return response()->json([
-                    'error' => trans('messages.account_created_failed'),
+                    'message' => trans('messages.account_created_failed'),
                 ], 500);
             }
         } else {
             return response()->json([
-                'error' => trans('messages.account_created_failed'),
+                'message' => trans('messages.account_created_failed'),
             ], 500);
         }
     }
@@ -80,7 +80,7 @@ class AuthController extends Controller
         $credentials = $request->validated();
         if (!Auth::attempt($credentials)) {
             return response([
-                'error' => trans('validation.invalid_credentials'),
+                'message' => trans('validation.invalid_credentials'),
             ], 422);
         }
         
@@ -89,7 +89,7 @@ class AuthController extends Controller
         
         if (!$user->hasVerifiedEmail()) {
             return response([
-                'error' => trans('validation.verify_email'),
+                'message' => trans('validation.verify_email'),
             ], 422);
         }
         
@@ -132,7 +132,7 @@ class AuthController extends Controller
         if ($activationCode === null) {
             return response()->json([
                 'status' => 400,
-                'error' => trans('messages.uncorrect_activation_code'),
+                'message' => trans('messages.uncorrect_activation_code'),
             ], 400);
         }
 
@@ -141,14 +141,14 @@ class AuthController extends Controller
         if (!$userActivationCode) {
             return response()->json([
                 'status' => 404,
-                'error' => trans('messages.uncorrect_activation_code'),
+                'message' => trans('messages.uncorrect_activation_code'),
             ], 404);
         }
 
         if (!$userActivationCode->is_active) {
             return response()->json([
                 'status' => 400,
-                'error' => trans('messages.activation_code_not_active'),
+                'message' => trans('messages.activation_code_not_active'),
             ], 400);
         }
 
@@ -158,7 +158,7 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => 404,
-                'error' => trans('messages.user_not_found'),
+                'message' => trans('messages.user_not_found'),
             ], 404);
         }
 
@@ -191,7 +191,7 @@ class AuthController extends Controller
         if ($user->hasVerifiedEmail()) {
             return response()->json([
                 'status' => 404,
-                'error' => trans('messages.account_already_active'),
+                'message' => trans('messages.account_already_active'),
             ], 404);
         }
 
@@ -199,7 +199,7 @@ class AuthController extends Controller
         if (!$userActivationCode) {
             return response()->json([
                 'status' => 404,
-                'error' => trans('messages.uncorrect_activation_code'),
+                'message' => trans('messages.uncorrect_activation_code'),
             ], 404);
         }
         
@@ -227,7 +227,7 @@ class AuthController extends Controller
         if ($user->hasVerifiedEmail()) {
             return response()->json([
                 'status' => 404,
-                'error' => trans('messages.account_already_active'),
+                'message' => trans('messages.account_already_active'),
             ], 404);
         }
 
@@ -235,7 +235,7 @@ class AuthController extends Controller
         if (!$userValidationCode) {
             return response()->json([
                 'status' => 404,
-                'error' => trans('messages.uncorrect_activation_code'),
+                'message' => trans('messages.uncorrect_activation_code'),
             ], 404);
         }
         
@@ -263,12 +263,12 @@ class AuthController extends Controller
 
             } catch (\Exception $err) {
                 return response()->json([
-                    'error' => trans('messages.uncorrect_activation_code'),
+                    'message' => trans('messages.uncorrect_activation_code'),
                 ], 500);
             }
         }else {
             return response()->json([
-                'error' => trans('messages.uncorrect_activation_code'),
+                'message' => trans('messages.uncorrect_activation_code'),
             ], 500);
         }
     }
@@ -345,7 +345,7 @@ class AuthController extends Controller
             
             return response()->json(['message' => trans('messages.user_personal_data_update_success')], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => trans('messages.user_personal_data_update_faild')], 500);
+            return response()->json(['message' => trans('messages.user_personal_data_update_faild')], 500);
         }
     }
     public function verifyUser(Request $request)

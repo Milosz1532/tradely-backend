@@ -35,30 +35,30 @@ class Handler extends ExceptionHandler
             //
         });
 
-        // $this->renderable(function (Throwable $e, $request) {
-        //     if ($request->expectsJson()) {
-        //         $statusCode = 500;
-        //         $message = 'Wystąpił błąd. Spróbuj ponownie później.';
+        $this->renderable(function (Throwable $e, $request) {
+            if ($request->expectsJson()) {
+                $statusCode = 500;
+                $message = 'Wystąpił błąd. Spróbuj ponownie później.';
 
-        //         if ($e instanceof ValidationException) {
-        //             $statusCode = 422;
-        //             $message = $e->getMessage();
-        //         } elseif ($e instanceof NotFoundHttpException) {
-        //             $statusCode = 404;
-        //             $message = 'Nie znaleziono żądanego zasobu.';
-        //         } elseif ($e instanceof QueryException) {
-        //             $statusCode = 500;
-        //             $message = 'Wystąpił błąd bazy danych. Spróbuj ponownie później.';
-        //         } elseif ($e instanceof AuthenticationException) {
-        //             $statusCode = 401;
-        //             $message = 'Nieautoryzowany dostęp.';
-        //         }
+                if ($e instanceof ValidationException) {
+                    $statusCode = 422;
+                    $message = $e->getMessage();
+                } elseif ($e instanceof NotFoundHttpException) {
+                    $statusCode = 404;
+                    $message = 'Nie znaleziono żądanego zasobu.';
+                } elseif ($e instanceof QueryException) {
+                    $statusCode = 500;
+                    $message = 'Wystąpił błąd bazy danych. Spróbuj ponownie później.';
+                } elseif ($e instanceof AuthenticationException) {
+                    $statusCode = 401;
+                    $message = 'Nieautoryzowany dostęp.';
+                }
         
 
-        //         return response()->json([
-        //             'error' => $message,
-        //         ], $statusCode);
-        //     }
-        // });
+                return response()->json([
+                    'message' => $message,
+                ], $statusCode);
+            }
+        });
     }
 }

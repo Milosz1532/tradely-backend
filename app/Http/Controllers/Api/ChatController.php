@@ -342,7 +342,7 @@ class ChatController extends Controller
 
         $announcement = Announcement::findOrFail($announcement_id);
         if ($announcement->user_id === $user->id) {
-            return response()->json(['error' => 'Nie możesz rozpocząć konwersacji ze swoim własnym ogłoszeniem.', 'status' => 0]);
+            return response()->json(['message' => 'Nie możesz rozpocząć konwersacji ze swoim własnym ogłoszeniem.', 'status' => 0]);
         }
 
         $existingConversation = Conversation::where('announcement_id', $announcement_id)
