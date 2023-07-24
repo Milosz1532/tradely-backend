@@ -11,5 +11,14 @@ return [
     'password_required' => 'Pole hasło jest wymagane.',
     'password_string' => 'Pole hasło musi być ciągiem znaków.',
     'invalid_credentials' => 'Podany adres email lub hasło jest nieprawidłowe.',
-    'verify_email' => "Potwierdź swój adres email"
+    'verify_email' => "Potwierdź swój adres email",
+
+    'required' => 'Pole :attribute jest wymagane.',
+    'numeric' => 'Pole :attribute musi być liczbą.',
+    'image' => 'Pole :attribute musi być obrazem.',
+    'mimes' => 'Pole :attribute musi mieć rozszerzenie: :values.',
+    'required|numeric' => 'Pole :attribute musi być liczbą i jest wymagane.',
+    'required|image' => 'Pole :attribute musi być obrazem i jest wymagane.',
+    'image|mimes:jpeg,png,jpg,webp|max:2048' => 'Pole :attribute musi być obrazem i mieć rozszerzenie: jpeg, png, jpg, webp, o maksymalnym rozmiarze 2048 KB.',
+    'array' => 'Pole :attribute musi być tablicą.',
 ];

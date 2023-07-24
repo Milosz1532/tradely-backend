@@ -14,8 +14,12 @@ use Illuminate\Support\Facades\URL;
 use Intervention\Image\Facades\Image;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Lang;
+
 
 use App\Models\Announcement;
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\KeywordSuggestion;
@@ -99,56 +103,75 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'title' => 'required',
             'description' => 'required',
             'price' => 'required',
-            'user_id' => 'required',
             'category_id' => 'required',
+            'province' => 'required',
             'location' => 'required',
-            'postal_code' => 'required',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'phone_number' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             'tags' => 'array', 
         ]);
-    
-        $tags = $data['tags'] ?? []; 
-    
+
+        if ($validator->fails()) {
+            // return response()->json(['message' => $validator->errors()], 400);
+            return response()->json(['message' => $validator->errors()->first()], 400);
+           
+
+        }
+
+        $user = $request->user();
+        $userId = $user->id;
+
+        if (!$userId) {
+            return response()->json(['message' => 'Tylko zalogowani użytkownicy mogą dodawać ogłoszenia.'], 400);
+        }
+
+
+        $tags = $request->input('tags', []);
+
 
         $tagIds = [];
         foreach ($tags as $tagName) {
             $tag = Tag::firstOrCreate(['name' => $tagName]);
             $tagIds[] = $tag->id;
         }
-    
-        unset($data['tags']);
-    
-        $announcement = Announcement::create($data);
-    
+
+        $announcement = Announcement::create([
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'price' => $request->input('price_type') === 1 && $request->input('price') > 0 ? $request->input('price') : null,
+            'user_id' => $userId, 
+            'category_id' => $request->input('category_id'),
+            'location' => $request->input('location'),
+            'latitude' => $request->input('latitude'),
+            'longitude' => $request->input('longitude'),
+            'phone_number' => $request->input('phone_number'),
+            'province' => $request->input('province'),
+            'price_type' => $request->input('price_type')
+        ]);
+
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-
                 $uuid = Uuid::uuid4()->toString();
-
-                // Konwersja obrazu na format .webp
                 $converted = Image::make($image)->encode('webp', 75);
 
-    
                 $path = 'public/announcements/' . $announcement->id . '_' . $uuid . '.webp';
-
-    
                 Storage::put($path, $converted->stream());
-    
+
                 $announcement->images()->create([
                     'image_path' => $path
                 ]);
             }
         }
-    
-        $announcement->tags()->attach($tagIds);
-    
-        return response()->json($announcement, 201);
 
+        $announcement->tags()->attach($tagIds);
+
+        return response()->json($announcement, 201);
     }
     
 

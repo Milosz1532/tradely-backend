@@ -17,9 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id');
             $table->string('title');
             $table->text('description');
-            $table->decimal('price', 8, 2);
+            $table->decimal('price', 8, 2)->nullable();
             $table->string('location');
-            $table->string('postal_code');
             $table->string('phone_number');
             $table->dateTime('created_at');
             $table->dateTime('updated_at')->nullable()->default(null);

@@ -84,7 +84,7 @@ Route::get('/announcements/search', [AnnouncementController::class, 'search'])->
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 // Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth:sanctum');
-Route::post('/announcements', [AnnouncementController::class, 'store']);
+Route::middleware('auth:sanctum')->post('/announcements', [AnnouncementController::class, 'store']);
 
 
 Route::get('/categories', [CategoryController::class, 'index']);
