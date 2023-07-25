@@ -119,7 +119,7 @@ class AnnouncementController extends Controller
 
         if ($validator->fails()) {
             // return response()->json(['message' => $validator->errors()], 400);
-            return response()->json(['message' => $validator->errors()->first()], 400);
+            return response()->json(['message' => "Wprowadzone dane nie są prawidłowe. Upewnij się, czy wszystkie pola są uzupełnione."], 400);
            
 
         }
@@ -144,7 +144,7 @@ class AnnouncementController extends Controller
         $announcement = Announcement::create([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
-            'price' => $request->input('price_type') === 1 && $request->input('price') > 0 ? $request->input('price') : null,
+            'price' => $request->input('price_type') == 1 && $request->input('price') > 0 ? $request->input('price') : null,
             'user_id' => $userId, 
             'category_id' => $request->input('category_id'),
             'location' => $request->input('location'),
