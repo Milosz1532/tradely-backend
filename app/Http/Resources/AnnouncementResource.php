@@ -39,6 +39,7 @@ class AnnouncementResource extends JsonResource
             'description' => $this->description,
             'location' => $this->location,
             'price' => $this->price,
+            'price_type' => $this->price_type,
             'user_id' => $this->user_id,
             'created_at' => optional($this->created_at)->format('d.m.Y H:i:s'),
 

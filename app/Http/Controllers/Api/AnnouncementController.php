@@ -31,37 +31,56 @@ class AnnouncementController extends Controller
     public function index(Request $request)
     {
 
-        $location = $request->input('location');
+        $recentAnnouncementIds = $request->input('recentAnnouncementIds');
+        $recentAnnouncementIds = explode(',', $recentAnnouncementIds);
+
+        $userLatitude = $request->input('userLatitude');
+        $userLongitude = $request->input('userLongitude');
+
         $latestAnnouncements = Announcement::query()
             ->where('status_id', '=', 2)
             ->orderBy('id', 'desc')
             ->take(20)
             ->get();
-        
-        $locationAnnouncements = [];
-        if ($location) {
-            $locationAnnouncements = Announcement::query()
-                ->where('location', '=', $location)
-                ->where('status_id', '=', 2)
-                ->orderBy('id', 'desc')
-                ->take(20)
-                ->get();
-        }
-        
+
+
+
         $categoryAnnouncements = Announcement::query()
             ->where('category_id', '=', 1)
             ->where('status_id', '=', 2)
             ->orderBy('id', 'desc')
             ->take(20)
             ->get();
-        
+
+        $recentAnnouncements = [];
+        if ($recentAnnouncementIds) {
+            $orderByIds = implode(',', $recentAnnouncementIds);
+
+            $recentAnnouncements = Announcement::whereIn('id', $recentAnnouncementIds)
+                ->orderByRaw("FIELD(id, $orderByIds)")
+                ->get();
+        }
+
+        if ($userLatitude && $userLongitude) {
+            $nearbyAnnouncements = Announcement::selectRaw('*, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance', [$userLatitude, $userLongitude, $userLatitude])
+                ->where('status_id', '=', 2)
+                ->having('distance', '<=', 15) // Odległość 10 km
+                ->orderBy('distance')
+                ->take(20)
+                ->get();
+        } else {
+            $nearbyAnnouncements = [];
+        }
+
         return [
             'latest_announcements' => AnnouncementResource::collection($latestAnnouncements),
-            'location_announcements' => AnnouncementResource::collection($locationAnnouncements),
             'category_announcements' => AnnouncementResource::collection($categoryAnnouncements),
+            'recent_announcements' => AnnouncementResource::collection($recentAnnouncements),
+            'nearby_announcements' => AnnouncementResource::collection($nearbyAnnouncements),
         ];
-        
     }
+
+
 
     public function userFavoriteAnnouncements(Request $request) 
     {
@@ -113,7 +132,7 @@ class AnnouncementController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'phone_number' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4048',
             'tags' => 'array', 
         ]);
 
