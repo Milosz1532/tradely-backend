@@ -216,7 +216,8 @@ class AnnouncementController extends Controller
             })->values(),
             'location' => [
                 'location_name' => $announcement->location,
-                'postal_code' =>$announcement->postal_code,
+                'latitude' =>$announcement->latitude,
+                'longitude' => $announcement->longitude,
             ],
             'user' => [
                 'id' => $user->id,
