@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\KeywordSuggestionController;
+use App\Http\Controllers\Api\FiltersController;
 
 
 
@@ -78,6 +79,7 @@ Route::post('resend-verification-email',  [AuthController::class, 'resendVerific
 
 
 
+Route::get('/subcategoriesFilters/{subcategoryId}', [FiltersController::class, 'getFiltersForSubcategory']);
 
 
 Route::get('/announcements/search', [AnnouncementController::class, 'search'])->name('search_announcement');

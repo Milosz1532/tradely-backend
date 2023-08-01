@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Subcategory;
 
 
 class CategoryController extends Controller
@@ -17,6 +18,7 @@ class CategoryController extends Controller
     public function index()
 {
     $categories = Category::all(); 
+    $subcategories = Subcategory::all(); 
 
 
     $categoriesData = [];
@@ -29,7 +31,11 @@ class CategoryController extends Controller
         $categoriesData[] = $categoryData;
     }
 
-    return response()->json($categoriesData);
+
+    return response()->json([
+        'categories' => $categoriesData,
+        'subcategories' => $subcategories,
+    ]);
 }
 
     /**
