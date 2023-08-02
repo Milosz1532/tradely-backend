@@ -17,4 +17,9 @@ class SubcategoryFilter extends Model
     {
         return $this->hasMany(SubcategoryFilterValue::class, 'filter_id');
     }
+
+    public function subcategories()
+    {
+        return $this->belongsToMany(Subcategory::class, 'subcategory_filters', 'filter_id', 'subcategory_id');
+    }
 }

@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('subcategories_filters', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('subcategory_id');
             $table->string('name');
             $table->string('placeholder');
             $table->string('input_type');
             $table->timestamps();
 
-            $table->foreign('subcategory_id')->references('id')->on('subcategories');
         });
     }
 

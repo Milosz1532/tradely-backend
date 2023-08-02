@@ -13,6 +13,6 @@ class Subcategory extends Model
 
     public function filters()
     {
-        return $this->hasMany(SubcategoryFilter::class);
+        return $this->belongsToMany(SubcategoryFilter::class, 'subcategory_filters', 'subcategory_id', 'filter_id');
     }
 }
