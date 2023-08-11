@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('announcement_id');
             $table->unsignedBigInteger('filter_id');
-            $table->string('value');
+            $table->unsignedBigInteger('filter_value_id')->nullable();
+            $table->unsignedBigInteger('custom_value')->nullable();
             $table->timestamps();
 
             $table->foreign('announcement_id')->references('id')->on('announcements');
             $table->foreign('filter_id')->references('id')->on('subcategories_filters');
+            $table->foreign('filter_value_id')->references('id')->on('subcategories_filters_values');
         });
     }
 

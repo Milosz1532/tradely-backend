@@ -45,6 +45,13 @@ class Announcement extends Model
             ->withTimestamps();
     }
 
+    public function filters()
+    {
+        return $this->hasMany(AnnouncementFilter::class);
+    }
+
+
+
 
 
 }

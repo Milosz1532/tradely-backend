@@ -19,10 +19,13 @@ use Illuminate\Support\Facades\Lang;
 
 
 use App\Models\Announcement;
+use App\Models\AnnouncementFilter;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\KeywordSuggestion;
+use App\Models\SubcategoriesFilter;
+
 
 class AnnouncementController extends Controller
 {
@@ -241,37 +244,79 @@ class AnnouncementController extends Controller
 
 
     public function search(Request $request)
-    {
-        $location = $request->input('location') ?? "all_locations";
-        $categoryName = $request->input('category') ?? "all_categories";
-        $keyword = $request->input('keyword');
+{
+    $location = $request->input('location') ?? "all_locations";
+    $categoryName = $request->input('category') ?? "all_categories";
+    $keyword = $request->input('keyword');
+    $filters = $request->input('filters');
+    // $distance = $request->input('distance');
+    $amountFrom = $request->input('amountFrom');
+    $amountTo = $request->input('amountTo');
 
-        $query = Announcement::query()->where('status_id', 2);
 
 
-        if ($location !== 'all_locations') {
-            $query->where('location', $location);
-        }
 
-        if ($categoryName !== 'all_categories') {
-            $category = Category::where('name', $categoryName)->first();
+    $filtersArray = json_decode($filters, true);
 
-            $query->where('category_id', $category->id);
-        }
+    $query = Announcement::query()->where('status_id', 2);
 
-        if (!empty($keyword)) {
-            $query->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', "%$keyword%")
-                    ->orWhere('description', 'like', "%$keyword%");
-            });
-            $keywordSuggestion = new KeywordSuggestion();
-            $keywordSuggestion->addOrUpdateSuggestion($keyword);
-        }
-
-        $announcements = $query->orderBy('id', 'desc')->paginate(5);
-
-        return AnnouncementResource::collection($announcements);
+    if ($location !== 'all_locations') {
+        $query->where('location', $location);
     }
+
+    if ($categoryName !== 'all_categories') {
+        $category = Category::where('name', $categoryName)->first();
+        $query->where('category_id', $category->id);
+    }
+
+    if (!empty($keyword)) {
+        $query->where(function ($query) use ($keyword) {
+            $query->where('title', 'like', "%$keyword%")
+                ->orWhere('description', 'like', "%$keyword%");
+        });
+        $keywordSuggestion = new KeywordSuggestion();
+        $keywordSuggestion->addOrUpdateSuggestion($keyword);
+    }
+
+    if ($amountFrom) {
+        $query->where('price', '>=', $amountFrom);
+    }
+
+
+    if ($amountTo) {
+        $query->where('price', '<=', $amountTo);
+    }
+
+
+    if (!empty($filtersArray)) {
+        $query->where(function ($mainQuery) use ($filtersArray) {
+            foreach ($filtersArray as $filterId => $value) {
+                $filter = SubcategoriesFilter::find($filterId);
+                if ($filter) {
+                    $condition = $filter->condition ?? '=';
+                    $subQuery = AnnouncementFilter::query()
+                        ->whereColumn('announcements.id', 'announcement_filters.announcement_id')
+                        ->where('announcement_filters.filter_id', $filterId)
+                        ->where(function ($subquery) use ($filter, $value, $condition) {
+                            if ($filter->input_type !== 'input') {
+                                $subquery->where('announcement_filters.filter_value_id', intval($value));
+                            } else {
+                                $subquery->where('announcement_filters.custom_value', $condition, intval($value));
+                            }
+                        });
+                    $mainQuery->whereExists($subQuery);
+                }
+            }
+        });
+    }
+    
+
+    $announcements = $query->orderBy('id', 'desc')->paginate(5);
+
+    return AnnouncementResource::collection($announcements);
+}
+
+
 
 
     public function likeAnnouncement(Request $request)
