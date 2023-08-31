@@ -12,7 +12,7 @@ use App\Models\User;
 
 class Announcement extends Model
 {
-    protected $fillable = ['title', 'description', 'price', 'user_id', 'category_id', 'location', 'price_type', 'phone_number','latitude','longitude', 'province'];
+    protected $fillable = ['title', 'description', 'price', 'user_id', 'category_id', 'subcategory_id', 'location', 'price_type', 'phone_number','latitude','longitude', 'province'];
 
     public function user()
     {
