@@ -126,6 +126,7 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->input('filters'));
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'description' => 'required',
@@ -191,6 +192,40 @@ class AnnouncementController extends Controller
                 $announcement->images()->create([
                     'image_path' => $path
                 ]);
+            }
+        }
+
+        $filters = $request->input('filters');
+
+        if (!empty($filters)) {
+            $filtersArray = [];
+
+            $filtersArray = json_decode($filters, true);
+
+            if ($filtersArray === null && json_last_error() !== JSON_ERROR_NONE) {
+                return;
+            }
+
+            foreach ($filtersArray as $filterId => $value) {
+                $filter = SubcategoriesFilter::find($filterId);
+        
+                if ($filter) {
+                    $filterValueId = null;
+                    $customValue = null;
+        
+                    if ($filter->input_type !== 'input') {
+                        $filterValueId = intval($value);
+                    } else {
+                        $customValue = $value;
+                    }
+        
+                    AnnouncementFilter::create([
+                        'announcement_id' => $announcement->id,
+                        'filter_id' => $filter->id,
+                        'filter_value_id' => $filterValueId,
+                        'custom_value' => $customValue,
+                    ]);
+                }
             }
         }
 

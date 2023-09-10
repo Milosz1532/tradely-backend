@@ -79,7 +79,7 @@ Route::post('resend-verification-email',  [AuthController::class, 'resendVerific
 
 
 
-Route::get('/subcategoriesFilters/{subcategoryId}', [FiltersController::class, 'getFiltersForSubcategory']);
+Route::get('/subcategoriesFilters/{subcategoryId}/{context}', [FiltersController::class, 'getFiltersForSubcategory']);
 
 
 Route::get('/announcements/search', [AnnouncementController::class, 'search'])->name('search_announcement');

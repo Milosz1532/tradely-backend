@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AnnouncementFilter extends Model
 {
     protected $fillable = [
-        'announcement_id', 'filter_id', 'value',
+        'announcement_id', 'filter_id', 'filter_value_id','custom_value'
     ];
 
     public function filter()

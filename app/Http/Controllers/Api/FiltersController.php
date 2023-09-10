@@ -9,11 +9,14 @@ use App\Models\Subcategory;
 
 class FiltersController extends Controller
 {
-    public function getFiltersForSubcategory($subcategoryId)
+    public function getFiltersForSubcategory($subcategoryId, $context)
     {
-        $subcategory = Subcategory::with(['filters.values', 'filters.subcategories'])->findOrFail($subcategoryId);
+        $subcategory = Subcategory::with(['filters.values', 'filters.subcategories'])
+            ->findOrFail($subcategoryId);
 
-        $filters = $subcategory->filters->map(function ($filter) {
+        $filters = $subcategory->filters->filter(function ($filter) use ($context) {
+            return $context === 'all' || $filter->context === 'all' || $filter->context === $context;
+        })->map(function ($filter) {
             return [
                 'id' => $filter->id,
                 'name' => $filter->name,
@@ -24,10 +27,12 @@ class FiltersController extends Controller
                         'id' => $value->id,
                         'value' => $value->value,
                     ];
-                }),
+                })->values(), 
             ];
-        });
+        })->values(); 
 
-        return response()->json(['filters' => $filters]);
+        return response()->json(['filters' => $filters->toArray()]);
     }
 }
+
+

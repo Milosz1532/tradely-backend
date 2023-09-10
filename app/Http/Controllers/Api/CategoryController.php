@@ -16,27 +16,39 @@ class CategoryController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    $categories = Category::all(); 
-    $subcategories = Subcategory::all(); 
+    {
+        $categories = Category::all(); 
+        $subcategories = Subcategory::all(); 
 
+        $categoriesData = [];
+        foreach ($categories as $category) {
+            $categoryData = [
+                'id' => $category->id,
+                'name' => $category->name,
+                'icon' => $category->icon,
+                // 'image_path' => $category->image_path ? URL::to('/') . Storage::url($category->image_path) : null,
+                'created_at' => $category->created_at,
+                'updated_at' => $category->updated_at,
+                'subcategories' => []
+            ];
 
-    $categoriesData = [];
-    foreach ($categories as $category) {
-        $categoryData = $category->toArray();
-        
-        $categoryData['image_path'] = $category->image_path ? URL::to('/') . Storage::url($category->image_path) : null;
+            foreach ($subcategories as $subcategory) {
+                if ($subcategory->category_id === $category->id) {
+                    $categoryData['subcategories'][] = [
+                        'id' => $subcategory->id,
+                        'name' => $subcategory->name,
+                        'created_at' => $subcategory->created_at,
+                        'updated_at' => $subcategory->updated_at,
+                    ];
+                }
+            }
 
+            $categoriesData[] = $categoryData;
+        }
 
-        $categoriesData[] = $categoryData;
+        return response()->json($categoriesData);
     }
 
-
-    return response()->json([
-        'categories' => $categoriesData,
-        'subcategories' => $subcategories,
-    ]);
-}
 
     /**
      * Store a newly created resource in storage.
