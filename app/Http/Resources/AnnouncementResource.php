@@ -28,6 +28,7 @@ class AnnouncementResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'category_id' => $this->category_id,
+            'subcategory_id' => $this->subcategory_id,
             'category' => $this->category->name,
             'tags' => $this->tags->map(function ($tag) {
                 return ['id' => $tag->id, 'name' => $tag->name];

@@ -247,7 +247,10 @@ class AnnouncementController extends Controller
             'id' => $announcement->id,
             'title' => $announcement->title,
             'description' => $announcement->description,
+            'category' => $announcement->category,
+            'subcategory' => $announcement->subcategory,
             'price' => $announcement->price,
+            'price_type' => $announcement->price_type,
             'status' => [
                 'id' => $announcement->status->id,
                 'name' => $announcement->status->name,
