@@ -281,8 +281,13 @@ class ChatController extends Controller
     {
         $userId = $request->user()->id;
     
-        $conversations = Conversation::with(['announcement', 'messages'])->get();
-    
+        $conversations = Conversation::where('user_id', $userId)
+        ->orWhereHas('announcement', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+        ->with(['announcement', 'messages'])
+        ->get();
+            
         $conversationsData = $conversations->map(function ($conversation) use ($userId) {
             $firstImage = $conversation->announcement->images->first();
             $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
@@ -305,12 +310,16 @@ class ChatController extends Controller
                     $status = 1;
                 }
             }
+
+            $isAuthor = $conversation_user_id != $userId; 
+
     
             return [
                 'id' => $conversation->id,
                 'announcement_title' => $conversation->announcement->title,
                 'announcement_first_image' => $imageUrl,
                 'announcement_price' => $conversation->announcement->price,
+                'announcement_id' => $conversation->announcement->id,
                 'latest_message' => $latestMessage ? [
                     'id' => $latestMessage->id,
                     'conversation_id' => $latestMessage->conversation_id,
@@ -319,6 +328,7 @@ class ChatController extends Controller
                     'created_at' => $latestMessage->created_at,
                     'status' => $status,
                 ] : null,
+                'author' => $isAuthor, 
             ];
         });
     
@@ -342,7 +352,7 @@ class ChatController extends Controller
 
         $announcement = Announcement::findOrFail($announcement_id);
         if ($announcement->user_id === $user->id) {
-            return response()->json(['message' => 'Nie możesz rozpocząć konwersacji ze swoim własnym ogłoszeniem.', 'status' => 0]);
+            return response()->json(['message' => 'Nie możesz rozpocząć konwersacji ze swoim własnym ogłoszeniem.', 'status' => 0],400);
         }
 
         $existingConversation = Conversation::where('announcement_id', $announcement_id)

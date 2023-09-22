@@ -26,6 +26,7 @@ use App\Models\Subcategory;
 use App\Models\Tag;
 use App\Models\KeywordSuggestion;
 use App\Models\SubcategoriesFilter;
+use App\Models\SubcategoryFilterValue;
 
 
 class AnnouncementController extends Controller
@@ -243,6 +244,30 @@ class AnnouncementController extends Controller
 
         $totalAnnouncements = $user->announcements()->count();
 
+        $filters = $announcement->filters->map(function ($filter) {
+            $filterData = [
+                'id' => $filter->id,
+                'filter_id' => $filter->filter_id,
+                'filter_value_id' => $filter->filter_value_id,
+                'custom_value' => $filter->custom_value,
+            ];
+        
+            if ($filter->filter) {
+                $filterData['name'] = $filter->filter->name;
+            }
+        
+            // Pobierz nazwę wartości filtra na podstawie filter_value_id
+            if ($filter->filter_value_id) {
+                $filterValue = SubcategoryFilterValue::find($filter->filter_value_id);
+                if ($filterValue) {
+                    $filterData['filter_value'] = $filterValue->value;
+                }
+            }
+        
+            return $filterData;
+        })->values();
+        
+
         $response = [
             'id' => $announcement->id,
             'title' => $announcement->title,
@@ -276,8 +301,11 @@ class AnnouncementController extends Controller
                 return URL::to('/') . Storage::url($image->image_path);
             })->toArray(),
             'favorite_count' => $announcement->favoritedByUsers->count(),
-            
+            'product_state' => $announcement->product_state,
         ];
+
+        $response['filters'] = $filters;
+
 
         return response()->json($response);
     }
