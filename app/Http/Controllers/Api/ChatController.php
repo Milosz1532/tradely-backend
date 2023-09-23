@@ -379,12 +379,16 @@ class ChatController extends Controller
         } else {
             $user_last_activity = Carbon::parse($announcement->user->last_seen)->diffForHumans();
         }
+
+        $firstImage = $announcement->images->first();
+        $imageUrl = $firstImage ? URL::to('/') . Storage::url($firstImage->image_path) : null;
         
 
         $formattedAnnouncement = [
             'id' => $announcement->id,
             'title' => $announcement->title,
-            'price' => $announcement->price
+            'price' => $announcement->price,
+            'image' => $imageUrl,
         ];
 
         $formattedUser = [
