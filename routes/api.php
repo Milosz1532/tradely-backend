@@ -30,10 +30,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile/data', [AuthController::class, 'profileData']);
     Route::put('/profile/update/personal', [AuthController::class, 'updatePersonalData']);
 
-    Route::get('/profile/announcements', [AnnouncementController::class, 'userAnnouncements']);
+    Route::get('/profile/active-announcements', [AnnouncementController::class, 'getUserActiveAnnouncements']);
+    Route::get('/profile/completed-announcements', [AnnouncementController::class, 'getUserCompletedAnnouncements']);
+
+    
+
+
+    
     Route::get('/profile/favoriteAnnouncements', [AnnouncementController::class, 'userFavoriteAnnouncements']);
     Route::post('/announcement/like', [AnnouncementController::class, 'likeAnnouncement']);
 });
+
+
 
 
 //TEMPLATE

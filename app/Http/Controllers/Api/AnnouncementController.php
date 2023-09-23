@@ -125,6 +125,38 @@ class AnnouncementController extends Controller
         ];
     }
 
+    public function getUserActiveAnnouncements(Request $request) 
+    {
+        $userId = $request->user()->id;
+        
+        $query = Announcement::query()
+            ->where('user_id', $userId)
+            ->where('status_id', 2)
+            ->orderBy('id', 'desc');
+    
+        $perPage = 5; 
+        $active_announcements = $query->paginate($perPage);
+    
+        return AnnouncementResource::collection($active_announcements);
+    }
+
+
+    public function getUserCompletedAnnouncements(Request $request) 
+    {
+        $userId = $request->user()->id;
+        
+        $query = Announcement::query()
+            ->where('user_id', $userId)
+            ->where('status_id', 4)
+            ->orderBy('id', 'desc');
+    
+        $perPage = 5; 
+        $active_announcements = $query->paginate($perPage);
+    
+        return AnnouncementResource::collection($active_announcements);
+    }
+    
+
     public function store(Request $request)
     {
         // dd($request->input('filters'));
