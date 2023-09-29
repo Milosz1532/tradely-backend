@@ -42,9 +42,9 @@ class AnnouncementResource extends JsonResource
             'price' => $this->price,
             'price_type' => $this->price_type,
             'user_id' => $this->user_id,
-            'created_at' => optional($this->created_at)->format('d.m.Y H:i:s'),
+            'created_at' => optional($this->created_at)->format('d.m.Y H:i'),
 
-            'updated_at' => optional($this->updated_at)->format('d.m.Y H:i:s'),
+            'updated_at' => optional($this->updated_at)->format('d.m.Y H:i'),
 
             'first_image' => $imageUrl,
             'favorite_count' => $this->favoritedByUsers->count(),

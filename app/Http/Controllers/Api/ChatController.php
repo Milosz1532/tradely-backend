@@ -320,6 +320,7 @@ class ChatController extends Controller
                 'announcement_first_image' => $imageUrl,
                 'announcement_price' => $conversation->announcement->price,
                 'announcement_id' => $conversation->announcement->id,
+                'announcement_author' => $conversation->Announcement->user->login,
                 'latest_message' => $latestMessage ? [
                     'id' => $latestMessage->id,
                     'conversation_id' => $latestMessage->conversation_id,
@@ -393,7 +394,7 @@ class ChatController extends Controller
 
         $formattedUser = [
             'id' => $announcement->user->id,
-            'name' => $announcement->user->name,
+            'username' => $announcement->user->login,
             'email' => $announcement->user->email,
             'user_last_activity' => $user_last_activity,
         ];

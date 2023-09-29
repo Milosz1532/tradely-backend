@@ -354,6 +354,7 @@ class AnnouncementController extends Controller
         // $distance = $request->input('distance');
         $amountFrom = $request->input('amountFrom');
         $amountTo = $request->input('amountTo');
+        $sortType = $request->input('sortType');
 
 
 
@@ -401,7 +402,7 @@ class AnnouncementController extends Controller
 
         if (!empty($filtersArray)) {
             $query->where(function ($mainQuery) use ($filtersArray) {
-                foreach ($filtersArray as $filterId => $value) {
+                foreach ($filtersArray['dynamicFilters'] as $filterId => $value) {
                     $filter = SubcategoriesFilter::find($filterId);
                     if ($filter) {
                         $condition = $filter->condition ?? '=';
@@ -420,7 +421,35 @@ class AnnouncementController extends Controller
                 }
             });
         }
+
+        if (!empty($filtersArray['offerProductState'])) {
+            $query->whereIn('product_state', $filtersArray['offerProductState']);
+        }
+
+        if (!empty($filtersArray['offerPricesTypes'])) {
+            $query->whereIn('price_type', $filtersArray['offerPricesTypes']);
+        }
         
+        
+
+        switch ($sortType) {
+            case 1:
+                $query->orderBy('created_at', 'desc'); // Sort by newest
+                break;
+            case 2:
+                $query->orderBy('created_at', 'asc'); // Sort by oldest
+                break;
+            case 3:
+                $query->orderBy('price', 'desc'); // Sort by price descending
+                break;
+            case 4:
+                $query->orderBy('price', 'asc'); // Sort by price ascending
+                break;
+            default:
+                $query->orderBy('id', 'desc'); // Default sorting
+        }
+        
+
 
         $announcements = $query->orderBy('id', 'desc')->paginate(5);
 
