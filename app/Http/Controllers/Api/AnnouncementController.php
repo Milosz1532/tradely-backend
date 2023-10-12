@@ -327,6 +327,7 @@ class AnnouncementController extends Controller
                 'created_at' => $user->created_at ? $user->created_at->format('d.m.Y H:i:s') : trans('messages.no_data'),
                 'total_announcements' => $totalAnnouncements,
             ],
+            'phone_number' => $announcement->phone_number,
             'created_at' => optional($announcement->created_at)->format('d.m.Y H:i:s'),
             'updated_at' => optional($announcement->updated_at)->format('d.m.Y H:i:s'),
             'images' => $announcement->images->map(function ($image) {

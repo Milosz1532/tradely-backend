@@ -367,9 +367,6 @@ class ChatController extends Controller
 
             return response()->json([
                 'id' => $existingConversation->id,
-                'announcement_title' => $existingConversation->announcement->title,
-                'announcement_first_image' => $imageUrl,
-                'latest_message' => $existingConversation->messages->last(),
             ],202);
         }
 
