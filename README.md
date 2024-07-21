@@ -1,4 +1,4 @@
-# Tradely Front-backend
+# Tradely Backend
 
 ![Grafika_glowna](https://raw.githubusercontent.com/Milosz1532/tradely-frontend/master/APP_SCREENS/Screenshot_10.png)
 
